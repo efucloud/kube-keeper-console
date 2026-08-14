@@ -24,10 +24,9 @@ FROM registry.cn-shenzhen.aliyuncs.com/efucloud-public/nginx:1.29.4-alpine
 ARG GIT_COMMIT
 ARG BUILD_DATE
 
+LABEL org.opencontainers.image.source=https://github.com/efucloud/kube-keeper-saas
 LABEL org.opencontainers.image.revision=${GIT_COMMIT}
 LABEL org.opencontainers.image.created=${BUILD_DATE}
-LABEL com.efucloud.build.commit=${GIT_COMMIT}
-LABEL com.efucloud.build.date=${BUILD_DATE}
 
 # 从 builder 复制构建产物
 COPY --from=builder /app/dist /usr/share/nginx/html
