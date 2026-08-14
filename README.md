@@ -1,43 +1,49 @@
 # kube-keeper-console
-企业级Kubernetes集群管理系统前端
+
+[English](./README.en.md)
+
+企业级 Kubernetes 集群管理系统前端。
 
 ## 开发
+
+安装依赖：
+
 ```shell
-yarn
+yarn install --frozen-lockfile
+```
+
+启动开发环境：
+
+```shell
 yarn dev
 ```
 
-## 本地构建镜像
+执行生产构建：
 
 ```shell
-./build.sh
+yarn build
 ```
 
-可选参数：
+## Docker 镜像
 
-```shell
-IMAGE_TAG=v1.0.3 ./build.sh
-PUSH_LATEST=false ./build.sh
-PLATFORM=linux/amd64 ./build.sh
-```
+仓库根目录提供 [Dockerfile](/Users/cloudy/Documents/efucloud/kube-keeper-console/Dockerfile) 用于构建发布镜像。
 
-`build.sh` 会先执行前端构建，再使用 `Dockerfile.local` 生成并推送镜像到 `ghcr.io/efucloud/kube-keeper-console`。
-
-默认情况下，`build.sh` 会基于当前仓库最新的 Git tag 自动递增 patch 版本号。
-例如本地最新 tag 是 `v1.0.2` 时，默认镜像 tag 会使用 `v1.0.3`。
+镜像发布由 GitHub Actions 执行，目标仓库为 `ghcr.io/efucloud/kube-keeper-console`。
 
 ## GitHub Workflow
 
-仓库新增了前端 CI 流程：
+仓库包含以下自动化流程：
 
 - 分支 push / PR 时安装依赖并执行 `yarn build`
-- 推送任意 tag 时构建并推送镜像到 `ghcr.io/efucloud/kube-keeper-console`
+- 推送 Git tag 时基于根目录 `Dockerfile` 构建并发布镜像到 `ghcr.io/efucloud/kube-keeper-console`
 
-发布时推荐使用递增的语义化 tag，例如：
+## 发布
+
+推荐使用递增的语义化版本 tag，例如：
 
 ```shell
-git tag v1.0.3
-git push origin v1.0.3
+git tag v1.0.4
+git push origin v1.0.4
 ```
 
-GitHub Actions 会直接使用内置的 `GITHUB_TOKEN` 推送镜像到 GitHub Container Registry，无需额外配置阿里云镜像仓库账号。
+推送 tag 后，GitHub Actions 会自动构建并发布对应版本镜像以及 `latest` 标签。
