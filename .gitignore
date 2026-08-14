@@ -39,3 +39,5 @@ screenshot
 /.monkeycode
 build
 .config
+/build.sh
+/Dockerfile.local
