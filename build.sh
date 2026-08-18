@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_BIN="${DOCKER_BIN:-docker}"
 DOCKERFILE="${DOCKERFILE:-${ROOT_DIR}/Dockerfile.local}"
-IMAGE_REPO="${IMAGE_REPO:-ghcr.io/efucloud/kube-keeper-console}"
+IMAGE_REPO="${IMAGE_REPO:-registry.cn-shenzhen.aliyuncs.com/efucloud-public/kube-keeper-console}"
 PUSH_LATEST="${PUSH_LATEST:-true}"
 PLATFORM="${PLATFORM:-linux/amd64}"
 DOCKER_BUILD_FLAGS="${DOCKER_BUILD_FLAGS:-}"
