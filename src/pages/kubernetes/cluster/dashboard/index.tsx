@@ -135,7 +135,7 @@ const IndexDashboard: React.FC = () => {
           <Card
             variant={'borderless'}
             onClick={() => {
-              window.open(normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/node`));
+              window.open(normalizeKubernetesPath(`/kubernetes/cluster/node`));
             }}
           >
             <span style={{ textAlign: 'center' }}>
@@ -152,7 +152,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace`),
+                normalizeKubernetesPath(`/kubernetes/cluster/namespace`),
               );
             }}
           >
@@ -170,7 +170,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/workload/pods`),
+                normalizeKubernetesPath(`/kubernetes/cluster/workload/pods`),
               );
             }}
           >
@@ -188,7 +188,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/workload/deployments`),
+                normalizeKubernetesPath(`/kubernetes/cluster/workload/deployments`),
               );
             }}
           >
@@ -207,7 +207,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/workload/statefulsets`),
+                normalizeKubernetesPath(`/kubernetes/cluster/workload/statefulsets`),
               );
             }}
           >
@@ -226,7 +226,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/workload/daemonsets`),
+                normalizeKubernetesPath(`/kubernetes/cluster/workload/daemonsets`),
               );
             }}
           >
@@ -247,7 +247,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/workload/jobs`),
+                normalizeKubernetesPath(`/kubernetes/cluster/workload/jobs`),
               );
             }}
           >
@@ -266,7 +266,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/workload/cronjobs`),
+                normalizeKubernetesPath(`/kubernetes/cluster/workload/cronjobs`),
               );
             }}
           >
@@ -284,7 +284,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/config/configmaps`),
+                normalizeKubernetesPath(`/kubernetes/cluster/config/configmaps`),
               );
             }}
           >
@@ -303,7 +303,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/config/secrets`),
+                normalizeKubernetesPath(`/kubernetes/cluster/config/secrets`),
               );
             }}
           >
@@ -322,7 +322,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/networks/services`),
+                normalizeKubernetesPath(`/kubernetes/cluster/networks/services`),
               );
             }}
           >
@@ -341,7 +341,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/networks/ingresses`),
+                normalizeKubernetesPath(`/kubernetes/cluster/networks/ingresses`),
               );
             }}
           >
@@ -357,30 +357,13 @@ const IndexDashboard: React.FC = () => {
       </Row>
 
       <Row gutter={16} style={{ marginTop: 16 }}>
+        
         <Col span={4}>
           <Card
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/market/helm/histories`),
-              );
-            }}
-          >
-            <span style={{ textAlign: 'center' }}>
-              <Statistic
-                valueStyle={{ color: colorPrimary }}
-                title={getClusterResource('HelmInstance', false)}
-                value={dashboard.helmInstance}
-              />
-            </span>
-          </Card>
-        </Col>
-        <Col span={4}>
-          <Card
-            variant={'borderless'}
-            onClick={() => {
-              window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/storage/storageclass`),
+                normalizeKubernetesPath(`/kubernetes/cluster/storage/storageclass`),
               );
             }}
           >
@@ -399,7 +382,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/storage/persistentvolume`),
+                normalizeKubernetesPath(`/kubernetes/cluster/storage/persistentvolume`),
               );
             }}
           >
@@ -418,7 +401,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/storage/persistentvolumeclaim`),
+                normalizeKubernetesPath(`/kubernetes/cluster/storage/persistentvolumeclaim`),
               );
             }}
           >
@@ -437,7 +420,7 @@ const IndexDashboard: React.FC = () => {
             variant={'borderless'}
             onClick={() => {
               window.open(
-                normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/customresourcedefinitions`),
+                normalizeKubernetesPath(`/kubernetes/cluster/customresourcedefinitions`),
               );
             }}
           >

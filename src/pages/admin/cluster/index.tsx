@@ -242,7 +242,7 @@ const TableList: React.FC = () => {
               <SiKubernetes
                 onClick={() =>
                   window.open(
-                    `/kubernetes/cluster/${entity.code}/dashboard/overview`,
+                    `/kubernetes/cluster/dashboard/overview?cluster=${entity.code}`,
                   )
                 }
                 style={{

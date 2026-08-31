@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster } = getCurrentViewInfo();
   const [info, setInfo] = useState<IAPIService>();
   const baseApi = `apis/apiregistration.k8s.io/v1/apiservices`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/apiservices`;
+  const baseAddress = `/kubernetes/cluster/apiservices`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

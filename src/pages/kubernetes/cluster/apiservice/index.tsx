@@ -144,7 +144,6 @@ const IndexDashboard: React.FC = () => {
     // 批量删除
     selectedRows.forEach(async (entity: IAPIService) => {
       const params = {
-
         cluster,
         address: `apis/apiregistration.k8s.io/v1/apiservices/${entity.metadata?.name}`,
       };
@@ -197,7 +196,7 @@ const IndexDashboard: React.FC = () => {
           <>
             <a
               onClick={() => {
-                window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/apiservices/${entity?.metadata?.name}`);
+                window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/apiservices/${entity?.metadata?.name}`);
               }}
             >
               {entity?.metadata?.name}
