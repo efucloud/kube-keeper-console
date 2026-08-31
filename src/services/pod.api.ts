@@ -30,42 +30,6 @@ export async function listClusterPodFiles<PodFileList>(
     ...(options || {}),
   });
 }
-//Pod容器日志
-//Pod容器日志
-//请求方法: GET
-//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/pod/{pod}/{container}/log
-//参数名: cluster 参数类型: string 参数位置: path 是否必须: true  参数说明: 集群编码
-//参数名: container 参数类型: string 参数位置: path 是否必须: true  参数说明: Container
-//参数名: namespace 参数类型: string 参数位置: path 是否必须: true  参数说明: Namespace
-//参数名: pod 参数类型: string 参数位置: path 是否必须: true  参数说明: Pod
-//参数名: previous 参数类型: boolean 参数位置: query 是否必须: false  参数说明: Previous
-//参数名: sinceSeconds 参数类型: number 参数位置: query 是否必须: false  参数说明: 当前时间往前多少秒
-//参数名: sinceTime 参数类型: string 参数位置: query 是否必须: false  参数说明: 从什么时候开始的日志
-//参数名: tailLines 参数类型: number 参数位置: query 是否必须: false  参数说明: 最后多少行
-//参数名: timestamps 参数类型: boolean 参数位置: query 是否必须: false  参数说明: 显示时间戳
-export async function clusterPodContainerLog(
-  params: {
-    cluster: string;// 集群编码
-    namespace: string;// Namespace
-    pod: string;// Pod
-    container: string;// Container
-    previous?: boolean;// Previous
-    sinceSeconds?: number;// 当前时间往前多少秒
-    sinceTime?: string;// 从什么时候开始的日志
-    timestamps?: boolean;// 显示时间戳
-    tailLines?: number;// 最后多少行
-  },
-  options?: { [key: string]: any }) {
-  const { cluster, container, namespace, pod, ...rest } = params;
-  return request(`/api/v1/cluster/${cluster}/namespace/${namespace}/pod/${pod}/${container}/log`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    params: { ...rest },
-    ...(options || {}),
-  });
-}
 //Pod容器终端
 //Pod容器终端
 //请求方法: GET

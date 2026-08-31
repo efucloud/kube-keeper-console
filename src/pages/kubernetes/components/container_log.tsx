@@ -14,15 +14,25 @@ export type LogProps = {
   onSelectLog?: (logQuestion: string) => void;
 };
 
-const buildLogStreamUrl = (
+const buildLogWebSocketUrl = (
   cluster: string,
   namespace: string,
   pod: string,
   container: string,
   previous: boolean,
   tailLines: string,
+  accessToken: string,
 ): string => {
-  return `/api/stream/cluster/${cluster}/namespaces/${namespace}/pods/${pod}/logs?previous=${previous}&container=${container}&tailLines=${tailLines}`;
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const searchParams = new URLSearchParams({
+    previous: String(previous),
+    access_token: accessToken,
+  });
+  if (tailLines) {
+    searchParams.set('tailLines', tailLines);
+  }
+
+  return `${protocol}://${window.location.host}/api/ws/cluster/${encodeURIComponent(cluster)}/namespace/${encodeURIComponent(namespace)}/pod/${encodeURIComponent(pod)}/${encodeURIComponent(container)}/log?${searchParams.toString()}`;
 };
 
 export const PodContainerLog: React.FC<LogProps> = (props) => {
@@ -32,90 +42,49 @@ export const PodContainerLog: React.FC<LogProps> = (props) => {
   const intl = useIntl();
   const [selectedText, setSelectedText] = useState<string>('');
   const editorRef = useRef<any>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const webSocketRef = useRef<WebSocket | null>(null);
   const [tailLines, setTailLines] = useState<string>('100');
   const [previous, setPrevious] = useState<boolean>(false);
   
   // 修改：只存储相对于编辑器视口的偏移量，不再存储绝对坐标
   const [buttonOffset, setButtonOffset] = useState<{ top: number; left: number } | null>(null);
 
-  const startLogStream = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+  useEffect(() => {
+    const accessToken = orgToken?.access_token || '';
+    if (!container || !accessToken) {
+      return;
     }
-    const token = orgToken?.access_token || '';
-    const url = buildLogStreamUrl(
-      props.cluster,
-      props.namespace,
-      props.pod,
-      container,
-      previous,
-      tailLines
+
+    setLogs('');
+    const socket = new WebSocket(
+      buildLogWebSocketUrl(
+        props.cluster,
+        props.namespace,
+        props.pod,
+        container,
+        previous,
+        tailLines,
+        accessToken,
+      ),
     );
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+    webSocketRef.current = socket;
 
-    const fetchLogs = async () => {
-      try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            Accept: 'application/x-ndjson',
-            Authorization: `Bearer ${token}`,
-          },
-          signal: controller.signal,
-        });
-
-        if (!response.ok || !response.body) {
-          message.error(
-            intl.formatMessage({ id: 'cluster.log.stream.failed' }, { status: response.status })
-          );
-          return;
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (!line.trim()) continue;
-            try {
-              const payload = JSON.parse(line);
-              if (typeof payload.line === 'string') {
-                setLogs((prev) => prev + payload.line);
-              }
-            } catch (e) {
-              console.warn('Invalid NDJSON line:', line);
-            }
-          }
-        }
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.error('Log stream error:', err);
-          message.error(intl.formatMessage({ id: 'cluster.log.stream.error' }));
-        }
+    socket.onmessage = (event) => {
+      if (typeof event.data === 'string') {
+        setLogs((currentLogs) => currentLogs + event.data);
       }
     };
-    fetchLogs();
-  };
-
-  useEffect(() => {
-    if (props.containers.length > 0 && orgToken?.access_token) {
-      setLogs('');
-      startLogStream();
-    }
+    socket.onerror = (error) => {
+      if (webSocketRef.current === socket) {
+        console.error('Pod log WebSocket error:', error);
+        message.error(intl.formatMessage({ id: 'cluster.log.websocket.error' }));
+      }
+    };
 
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+      socket.close(1000, 'log view changed');
+      if (webSocketRef.current === socket) {
+        webSocketRef.current = null;
       }
     };
   }, [container, previous, props.cluster, props.namespace, props.pod, orgToken?.access_token, tailLines]);
