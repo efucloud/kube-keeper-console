@@ -1129,10 +1129,10 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
     () =>
       activeTab
         ? resolveEditorLanguage(
-            activeTab.path,
-            activeTab.language,
-            activeTab.mimeType,
-          )
+          activeTab.path,
+          activeTab.language,
+          activeTab.mimeType,
+        )
         : undefined,
     [activeTab],
   );
@@ -1285,7 +1285,7 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
     } catch (error: any) {
       message.error(
         error?.message ||
-          t('cluster.pod.file.download.failed', 'Failed to download file'),
+        t('cluster.pod.file.download.failed', 'Failed to download file'),
       );
     }
   };
@@ -1334,7 +1334,7 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
       );
       message.error(
         error?.message ||
-          t('cluster.pod.file.read.failed', 'Failed to read file'),
+        t('cluster.pod.file.read.failed', 'Failed to read file'),
       );
     }
   };
@@ -1414,10 +1414,10 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
     } catch (error: any) {
       message.error(
         error?.message ||
-          t(
-            'cluster.pod.file.format.failed',
-            'Failed to format the current file',
-          ),
+        t(
+          'cluster.pod.file.format.failed',
+          'Failed to format the current file',
+        ),
       );
     }
   };
@@ -1477,7 +1477,7 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
     } catch (error: any) {
       message.error(
         error?.message ||
-          t('cluster.pod.file.create.failed', 'Failed to create'),
+        t('cluster.pod.file.create.failed', 'Failed to create'),
       );
     }
   };
@@ -1512,16 +1512,16 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
           return prev.map((item) =>
             item.path === oldPath
               ? {
-                  ...item,
-                  key: nextPath,
-                  path: nextPath,
-                  title: getBaseName(nextPath),
-                  language: resolveEditorLanguage(
-                    nextPath,
-                    item.language,
-                    item.mimeType,
-                  ),
-                }
+                ...item,
+                key: nextPath,
+                path: nextPath,
+                title: getBaseName(nextPath),
+                language: resolveEditorLanguage(
+                  nextPath,
+                  item.language,
+                  item.mimeType,
+                ),
+              }
               : item,
           );
         }
@@ -1536,7 +1536,7 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
     } catch (error: any) {
       message.error(
         error?.message ||
-          t('cluster.pod.file.rename.failed', 'Failed to rename'),
+        t('cluster.pod.file.rename.failed', 'Failed to rename'),
       );
     }
   };
@@ -1579,7 +1579,7 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
         } catch (error: any) {
           message.error(
             error?.message ||
-              t('cluster.pod.file.delete.failed', 'Failed to delete'),
+            t('cluster.pod.file.delete.failed', 'Failed to delete'),
           );
         }
       },
@@ -1860,12 +1860,6 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
                       <Typography.Text strong style={{ display: 'block' }}>
                         {t('cluster.pod.file.explorer', 'File Explorer')}
                       </Typography.Text>
-                      <Typography.Text
-                        type="secondary"
-                        style={{ display: 'block', fontSize: 12, marginTop: 4 }}
-                      >
-                        {workspaceRootNode?.name || workspaceRootPath}
-                      </Typography.Text>
                     </div>
                     <Space size={[6, 6]} wrap>
                       <Tag style={{ margin: 0, borderRadius: 8 }}>
@@ -1889,47 +1883,6 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
                       </Tag>
                     </Space>
                   </div>
-                  <Space wrap size={[8, 8]} style={{ marginTop: 12 }}>
-                    <Button
-                      icon={<FileAddOutlined />}
-                      onClick={() =>
-                        setCreateDialog({
-                          open: true,
-                          directory: false,
-                          name: '',
-                        })
-                      }
-                    >
-                      {t('cluster.pod.file.create.file', 'New file')}
-                    </Button>
-                    <Button
-                      icon={<FolderAddOutlined />}
-                      onClick={() =>
-                        setCreateDialog({
-                          open: true,
-                          directory: true,
-                          name: '',
-                        })
-                      }
-                    >
-                      {t('cluster.pod.file.create.folder', 'New folder')}
-                    </Button>
-                    <Button
-                      icon={<EditOutlined />}
-                      disabled={!canMutateSelected}
-                      onClick={openRenameDialog}
-                    >
-                      {t('cluster.pod.file.rename', 'Rename')}
-                    </Button>
-                    <Button
-                      danger
-                      icon={<DeleteOutlined />}
-                      disabled={!canMutateSelected}
-                      onClick={() => void handleDelete()}
-                    >
-                      {t('cluster.pod.file.delete', 'Delete')}
-                    </Button>
-                  </Space>
                   <Input.Search
                     allowClear
                     value={searchValue}
@@ -2020,7 +1973,7 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
                                 </Typography.Text>
                               </div>
                               {explorerNode.entryType === 'file' &&
-                              explorerNode.meta?.binary ? (
+                                explorerNode.meta?.binary ? (
                                 <Typography.Text
                                   type="secondary"
                                   style={{ fontSize: 11 }}
@@ -2046,13 +1999,13 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
                           description={
                             searchValue.trim()
                               ? t(
-                                  'cluster.pod.file.search.empty',
-                                  'No matching files or folders',
-                                )
+                                'cluster.pod.file.search.empty',
+                                'No matching files or folders',
+                              )
                               : t(
-                                  'cluster.pod.file.directory.empty',
-                                  'This directory is empty',
-                                )
+                                'cluster.pod.file.directory.empty',
+                                'This directory is empty',
+                              )
                           }
                         />
                       </div>
@@ -2510,12 +2463,7 @@ export const PodContainerFile: React.FC<ContainerFileProps> = (props) => {
               }))
             }
           >
-            <Radio.Button value="file">
-              {t('cluster.pod.file.create.file', 'New file')}
-            </Radio.Button>
-            <Radio.Button value="dir">
-              {t('cluster.pod.file.create.folder', 'New folder')}
-            </Radio.Button>
+
           </Radio.Group>
           <Input
             value={createDialog.name}
