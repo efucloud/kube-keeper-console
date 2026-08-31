@@ -15,7 +15,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
 
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<ReplicaSet>();
-  const BaseAddress = namespace ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/cronjobs` : `/kubernetes/cluster/${cluster}/workload/cronjobs`
+  const BaseAddress = namespace ? `/kubernetes/namespace/workload/cronjobs` : `/kubernetes/cluster/workload/cronjobs`
   const params = useParams();
   const mode = params.action === Update ? Update : Create; // update or create
   const name = mode === Create ? '' : params.name || '' // resource name

@@ -5,8 +5,7 @@ import type { IIoK8sApimachineryPkgApisMetaV1ObjectMeta } from '@kubernetes-mode
 import Editor from '@monaco-editor/react';
 import { FormattedMessage, useAccess, useIntl } from '@umijs/max';
 import { Tooltip } from 'antd';
-import {
-  appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 
 export const ClusterTerminal: React.FC = () => {
   const access = useAccess();
@@ -27,7 +26,7 @@ export const ClusterTerminal: React.FC = () => {
             verticalAlign: 'middle',
           }}
           onClick={() => {
-            window.open(normalizeKubernetesPath(appendKubernetesViewQuery('/kubernetes/cluster/terminal', { cluster })))
+            window.open(appendKubernetesViewQuery('/kubernetes/cluster/terminal', { cluster }))
           }}
         />
       </Tooltip>

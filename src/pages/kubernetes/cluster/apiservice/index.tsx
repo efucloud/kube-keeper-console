@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -11,10 +11,9 @@ import type { IntlShape } from 'react-intl';
 import Continue from '@/pages/kubernetes/components/continue';
 import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { getClusterResource } from '@/utils/cluster';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import ResourceEditor from '@/pages/kubernetes/components/resource_editor';
 import AICopilot from '../../components/ai';
 
@@ -26,7 +25,6 @@ const IndexDashboard: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<IAPIService[]>([]);
   const [dataSource, setDataSource] = useState<IAPIService[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const [expandInfo, setExpandInfo] = useState<boolean>(false);
   const intl = useIntl();
   const [searchName, setSearchName] = useState<string>('');
@@ -153,38 +151,10 @@ const IndexDashboard: React.FC = () => {
     actionRef.current?.reload();
     return true;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: 'apis/apiregistration.k8s.io/v1/apiservices',
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
 
   const columns: ProColumns<IAPIService>[] = [
     {
@@ -196,7 +166,7 @@ const IndexDashboard: React.FC = () => {
           <>
             <a
               onClick={() => {
-                window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/apiservices/${entity?.metadata?.name}`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/cluster/apiservices/${entity?.metadata?.name}`);
               }}
             >
               {entity?.metadata?.name}
@@ -489,29 +459,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
 

@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { EditableProTable, FooterToolbar, ModalForm, PageContainer, ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -13,7 +13,6 @@ import Continue from '@/pages/kubernetes/components/continue';
 import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import PatchLabels from '@/pages/kubernetes/components/patch_labels';
 import { clusterGetProxy, clusterPatchProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import type { PatchSubsetValue } from '@/services/common';
 import { getClusterResource } from '@/utils/cluster';
@@ -40,7 +39,6 @@ const IndexDashboard: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<INode[]>([]);
   const [nodes, setNodes] = useState<INode[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const formRef = useRef<ProFormInstance>(undefined);
   const [expandInfo, setExpandInfo] = useState<boolean>(false);
   const [patchLabelVisible, setPatchLabelVisible] = useState<boolean>(false);
@@ -271,38 +269,10 @@ const IndexDashboard: React.FC = () => {
     });
     return nodes;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: 'api/v1/nodes',
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setNodes(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<INode>[] = [
     {
       title: intl.formatMessage({ id: 'cluster.resource.name' }),
@@ -1052,29 +1022,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >

@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, EditOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -12,10 +12,9 @@ import Continue from '@/pages/kubernetes/components/continue';
 import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import { RenderRules } from '@/pages/kubernetes/components/policy';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { getClusterResource } from '@/utils/cluster';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import ResourceEditor from '@/pages/kubernetes/components/resource_editor';
 
 import AICopilot from '../../components/ai';
@@ -39,7 +38,6 @@ const IndexDashboard: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<IClusterRole[]>([]); // 选中的行数据
   const [dataSource, setDataSource] = useState<IClusterRole[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // 表格数据源
-  const [watch, setWatch] = useState<boolean>(false);
   const formRef = useRef<ProFormInstance>(undefined); // 表单引用
   const [expandInfo, setExpandInfo] = useState<boolean>(false); // 是否展开详情
   const [detailDrawerVisible, setDetailDrawerVisible] = useState<boolean>(false); // 详情抽屉是否可见
@@ -175,38 +173,10 @@ const IndexDashboard: React.FC = () => {
   /**
    * 表格列配置
    */
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: 'apis/rbac.authorization.k8s.io/v1/clusterroles',
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<IClusterRole>[] = [
     {
       title: intl.formatMessage({ id: 'cluster.resource.name' }),
@@ -438,7 +408,7 @@ const IndexDashboard: React.FC = () => {
             <a
               key="update"
               onClick={() => {
-                window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/access/clusterroles/${record?.metadata?.name}/update`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/cluster/access/clusterroles/${record?.metadata?.name}/update`, { cluster: cluster });
               }}
             >
               <EditOutlined style={{ color: colorPrimary }} />
@@ -556,29 +526,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >

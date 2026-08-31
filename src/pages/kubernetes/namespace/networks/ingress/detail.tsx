@@ -1,4 +1,4 @@
-import { getClusterApiVersions, getColorPrimary, getCurrentViewInfo, getHeight, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getClusterApiVersions, getColorPrimary, getCurrentViewInfo, getHeight } from '@/utils/global';
 import { PageContainer, ProColumns, ProDescriptions, ProTable } from "@ant-design/pro-components";
 import { useParams, useIntl, FormattedMessage } from "@umijs/max";
 import { ReactNode, useEffect, useState } from "react";
@@ -26,7 +26,7 @@ const DetailView: React.FC = () => {
   const [editorResource, setEditorResource] = useState<boolean>(false);
   const resourceGroup = getClusterApiVersions(cluster, ['networking.k8s.io/v1', 'extensions/v1', 'extensions/v1beta1'], 'Ingress');
   const BaseApi = `apis/${resourceGroup.groupVersion}/namespaces/${namespace}/ingresses`;
-  const BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/networks/ingresses`;
+  const BaseAddress = `/kubernetes/namespace/networks/ingresses`;
   const [podVisible, setPodVisible] = useState<boolean>(false);
   const [labels, setLabels] = useState<Record<string, string>>({});
   const [selectedServiceName, setSelectedServiceName] = useState<string | undefined>(undefined);
@@ -53,7 +53,7 @@ const DetailView: React.FC = () => {
     const params = { cluster, address: BaseApi };
     await clusterDeleteProxy(params);
     message.success(intl.formatMessage({ id: 'cluster.pages.operation.success' }));
-    window.location.pathname = normalizeKubernetesPath(BaseAddress);
+    window.location.href = appendKubernetesViewQuery(BaseAddress);
     return true;
   };
   const moreItems = () => {
@@ -61,7 +61,7 @@ const DetailView: React.FC = () => {
     nodes.push({
       key: 'edit',
       label: <a style={{ color: colorPrimary }} onClick={() => {
-        window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${info?.metadata?.namespace}/networks/ingresses/${info?.metadata?.name}/update`)
+        window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/networks/ingresses/${info?.metadata?.name}/update`, { cluster: cluster, namespace: info?.metadata?.namespace })
       }}><FormattedMessage id='cluster.resource.operation.edit' /></a>
     })
     nodes.push({

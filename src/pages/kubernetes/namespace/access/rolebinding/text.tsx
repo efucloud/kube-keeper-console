@@ -17,8 +17,8 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const [info, setInfo] = useState<RoleBinding>();
   const BaseApi = `apis/rbac.authorization.k8s.io/v1/namespaces/${namespace}/rolebindings`;
   const BaseAddress = namespace
-    ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/access/rolebindings`
-    : `/kubernetes/cluster/${cluster}/access/rolebindings`;
+    ? `/kubernetes/namespace/access/rolebindings`
+    : `/kubernetes/cluster/access/rolebindings`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create; // update or create
   const name = mode === Create ? '' : params.name || ''; // resource name

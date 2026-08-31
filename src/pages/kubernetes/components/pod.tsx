@@ -8,7 +8,7 @@ import { useRef, useState } from 'react';
 import type { IntlShape } from 'react-intl';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
 import { getClusterResource } from '@/utils/cluster';
-import { getColorPrimary, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary } from '@/utils/global';
 import PodContainerLog from '@/pages/kubernetes/components/container_log';
 import PodContainerTerminal from '@/pages/kubernetes/components/container_terminal';
 import { RenderPodMetrics } from '@/pages/kubernetes/components/pod_metrics';
@@ -81,7 +81,7 @@ export const RenderPods: React.FC<RenderPodsProps> = (props) => {
           <>
             <a
               onClick={() => {
-                window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/pods/${entity?.metadata?.name}`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/pods/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
               }}
             >
               {entity?.metadata?.name}

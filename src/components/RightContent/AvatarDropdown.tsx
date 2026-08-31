@@ -4,7 +4,7 @@ import { Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useCallback } from 'react';
 import { flushSync } from 'react-dom';
-import { deleteAllToken, getColorPrimary, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, deleteAllToken, getColorPrimary } from '@/utils/global';
 import HeaderDropdown from '../HeaderDropdown';
 import { ItemType } from 'antd/es/menu/interface';
 
@@ -48,7 +48,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
   const loginOut = async () => {
     localStorage.clear();
     sessionStorage.clear();
-    window.location.pathname = normalizeKubernetesPath('/index');
+    window.location.href = appendKubernetesViewQuery('/index');
   };
   const { styles } = useStyles();
   const { initialState, setInitialState } = useModel('@@initialState');
@@ -67,9 +67,9 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
         return;
       }
       if (key === 'workplace') {
-        window.location.href = normalizeKubernetesPath('/workplace');
+        window.location.href = appendKubernetesViewQuery('/workplace');
       } else if (key === 'console') {
-        window.location.href = normalizeKubernetesPath(`/admin/account`);
+        window.location.href = appendKubernetesViewQuery(`/admin/account`);
       }
     },
     [setInitialState],

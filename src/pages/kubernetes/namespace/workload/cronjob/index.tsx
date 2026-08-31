@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, DockerOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, ReloadOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, DockerOutlined, EditOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, ReloadOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -16,11 +16,10 @@ import PatchLabels from '@/pages/kubernetes/components/patch_labels';
 import ResourceEditor from '@/pages/kubernetes/components/resource_editor';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy, clusterPostProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
 import { getClusterResource } from '@/utils/cluster';
-import { getClusterApiVersions, getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getClusterApiVersions, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 import PatchImages from '@/pages/kubernetes/components/patch_image';
 
@@ -43,7 +42,6 @@ const IndexDashboard: React.FC = () => {
 
   const [dataSource, setDataSource] = useState<ICronJob[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const [labelSelectorVisible, setLabelSelectorVisible] = useState<boolean>(false);
   const [searchLabels, setSearchLabels] = useState<{ [key: string]: string }>({});
   const [fieldSelectorVisible, setFieldSelectorVisible] = useState<boolean>(false);
@@ -56,9 +54,9 @@ const IndexDashboard: React.FC = () => {
   const [imageVisible, setImageVisible] = useState<boolean>(false);
   const resourceGroup = getClusterApiVersions(cluster, ['batch/v1', 'batch/v1beta1'], 'CronJob');
   const address = namespace ? `apis/${resourceGroup?.groupVersion}/namespaces/${namespace}/cronjobs` : `apis/${resourceGroup?.groupVersion}/cronjobs`;
-  let BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/cronjobs`;
+  let BaseAddress = `/kubernetes/namespace/workload/cronjobs`;
   if (!namespace || namespace === '' || namespace === '-') {
-    BaseAddress = `/kubernetes/cluster/${cluster}/workload/cronjobs`;
+    BaseAddress = `/kubernetes/cluster/workload/cronjobs`;
   }
   const debouncedNamespaceChange = debounce((value) => { setSearchNamespace(value); }, 1000);
   const [selectedNamespace, setSelectedNamespace] = useState<string>(namespace);
@@ -225,38 +223,10 @@ const IndexDashboard: React.FC = () => {
     message.success(intl.formatMessage({ id: 'cluster.pages.operation.success' }));
     actionRef.current?.reload();
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<ICronJob>[] = [
     {
       title: <FormattedMessage id="cluster.namespace" />,
@@ -311,7 +281,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/cronjobs`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/workload/cronjobs`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -331,10 +301,10 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 if (namespace) {
-                  window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/cronjobs/${entity?.metadata?.name}`);
+                  window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/cronjobs/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
                 } else {
                   window.open(
-                    normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/cronjobs/${entity?.metadata?.name}`),
+                    appendKubernetesViewQuery(`/kubernetes/namespace/workload/cronjobs/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                     '_blank',
                   );
                 }
@@ -689,7 +659,7 @@ const IndexDashboard: React.FC = () => {
             <a
               key="edit"
               onClick={() => {
-                window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${record?.metadata?.namespace}/workload/cronjobs/${record?.metadata?.name}/update`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/cronjobs/${record?.metadata?.name}/update`, { cluster: cluster, namespace: record?.metadata?.namespace });
               }}
             >
               <EditOutlined style={{ color: colorPrimary }} />
@@ -786,29 +756,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >
@@ -823,7 +771,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/create/text`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/create/text`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.text" />
@@ -834,7 +782,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="form"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/create/form`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/create/form`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.form" />

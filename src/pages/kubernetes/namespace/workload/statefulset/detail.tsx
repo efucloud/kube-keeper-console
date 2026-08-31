@@ -1,4 +1,4 @@
-import { getClusterApiVersions, getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getClusterApiVersions, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { PageContainer, ProColumns, ProDescriptions, ProTable } from "@ant-design/pro-components";
 import { useParams, useIntl, FormattedMessage } from "@umijs/max";
 import { useEffect, useState } from "react";
@@ -42,7 +42,7 @@ const DetailView: React.FC = () => {
   const [activeKey, setActiveKey] = useState<string>('containers');
   const resourceGroup = getClusterApiVersions(cluster, ['apps/v1', 'apps/v1beta1', 'apps/v1beta2'], 'StatefulSet');
   const BaseApi = `apis/apps/v1/namespaces/${namespace}/statefulsets`;
-  const BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/statefulsets`;
+  const BaseAddress = `/kubernetes/namespace/workload/statefulsets`;
   const [imageVisible, setImageVisible] = useState<boolean>(false);
   const getInfo = async () => {
     let params = { cluster, address: `${BaseApi}/${name}` } as Record<string, any>;
@@ -79,7 +79,7 @@ const DetailView: React.FC = () => {
     const params = { cluster, address: BaseApi };
     await clusterDeleteProxy(params);
     message.success(intl.formatMessage({ id: 'cluster.pages.operation.success' }));
-    window.location.pathname = normalizeKubernetesPath(BaseAddress);
+    window.location.href = appendKubernetesViewQuery(BaseAddress);
     return true;
   };
   const moreItems = () => {
@@ -100,7 +100,7 @@ const DetailView: React.FC = () => {
     if (info && !info?.metadata?.ownerReferences) {
       nodes.push({
         key: 'edit',
-        label: <a onClick={() => { window.location.href = normalizeKubernetesPath(`${BaseAddress}/${info.metadata?.name}/update`) }} style={{ color: colorPrimary }}><FormattedMessage id='model.update' /></a>,
+        label: <a onClick={() => { window.location.href = appendKubernetesViewQuery(`${BaseAddress}/${info.metadata?.name}/update`) }} style={{ color: colorPrimary }}><FormattedMessage id='model.update' /></a>,
       });
       nodes.push({
         key: 'labels',

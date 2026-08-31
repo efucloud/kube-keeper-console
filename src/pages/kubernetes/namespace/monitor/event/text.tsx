@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<IEvent>();
   const baseApi = `api/v1/namespaces/${namespace || '-'}/events`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace || '-'}/monitor/events`;
+  const baseAddress = `/kubernetes/namespace/monitor/events`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

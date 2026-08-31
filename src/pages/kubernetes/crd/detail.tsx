@@ -17,7 +17,7 @@ const DetailView: React.FC = () => {
   const intl = useIntl();
   const resourceGroup = getClusterApiVersions(cluster, ['apiextensions.k8s.io/v1', 'apiextensions.k8s.io/v1beta1'], 'CustomResourceDefinition');
   const BaseApi = `apis/${resourceGroup.groupVersion}/customresourcedefinitions`
-  const BaseAddress = `/kubernetes/cluster/${cluster}/customresourcedefinitions`
+  const BaseAddress = `/kubernetes/cluster/customresourcedefinitions`
   const getInfo = async () => {
     let params = { cluster, address: `${BaseApi}/${name}` } as Record<string, any>;
     const res = await clusterGetProxy(params) as CustomResourceDefinition;

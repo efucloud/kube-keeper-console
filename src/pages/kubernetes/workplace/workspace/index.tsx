@@ -1,4 +1,4 @@
-import { getColorPrimary, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary } from '@/utils/global';
 import { useIntl } from "@umijs/max";
 import { Button, Card, List, Space } from "antd";
 import { useEffect, useState } from "react";
@@ -46,7 +46,7 @@ const WorkspaceView: React.FC = () => {
               }}
             >
               <Button type='primary' onClick={() => {
-                window.location.href = normalizeKubernetesPath(`/kubernetes/cluster`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/cluster`);
               }}>{intl.formatMessage({ id: 'cluster.can.access' })}</Button>
             </div>
           </Space>
@@ -78,7 +78,7 @@ const WorkspaceView: React.FC = () => {
                   }}
                   extra={<Space size='middle'>
                     <ExportOutlined onClick={() => {
-                      window.location.href = normalizeKubernetesPath(`/kubernetes/workspace/${item.code}`);
+                      window.location.href = appendKubernetesViewQuery(`/kubernetes/workspace/${item.code}`);
                     }} style={{ color: colorPrimary }} />
                   </Space>}
                 >

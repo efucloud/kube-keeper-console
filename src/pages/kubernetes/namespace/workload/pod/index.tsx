@@ -1,4 +1,4 @@
-import { BugOutlined, CloseCircleOutlined, CodeOutlined, DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, ProfileOutlined, SaveOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, CodeOutlined, DeleteOutlined, EditOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, ProfileOutlined, SaveOutlined, SettingOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useIntl } from '@umijs/max';
@@ -16,11 +16,10 @@ import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import { RenderPodMetrics } from '@/pages/kubernetes/components/pod_metrics';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
 import { getClusterResource, isK8sVersionSupported } from '@/utils/cluster';
-import { getClusterVersion, getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getClusterVersion, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 import PatchLabels from '@/pages/kubernetes/components/patch_labels';
 import OwnerReferencesView from '@/pages/kubernetes/components/owner_references';
@@ -47,7 +46,6 @@ const IndexDashboard: React.FC = () => {
 
   const [dataSource, setDataSource] = useState<IPod[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const [currnetNumber, setCurrnetNumber] = useState<number>(0);
   const [remainingItemCount, setRemainingItemCount] = useState<number>(0);
   const [logDrawerVisible, setLogDrawerVisible] = useState<boolean>(false);
@@ -61,9 +59,9 @@ const IndexDashboard: React.FC = () => {
   const [editorResource, setEditorResource] = useState<boolean>(false);
   const [patchPod, setPatchPod] = useState<IPod>();
   const resourceResizeSupport = isK8sVersionSupported('1.35', getClusterVersion(cluster));
-  let BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/pods`;
+  let BaseAddress = `/kubernetes/namespace/workload/pods`;
   if (!namespace || namespace === '' || namespace === '-') {
-    BaseAddress = `/kubernetes/cluster/${cluster}/workload/pods`;
+    BaseAddress = `/kubernetes/cluster/workload/pods`;
   }
   const debouncedNamespaceChange = debounce((value) => { setSearchNamespace(value); }, 1000);
   const [selectedNamespace, setSelectedNamespace] = useState<string>(namespace);
@@ -242,38 +240,10 @@ const IndexDashboard: React.FC = () => {
     }
     return nodes;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<IPod>[] = [
     {
       title: <FormattedMessage id="cluster.namespace" />,
@@ -330,7 +300,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/pods`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/workload/pods`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -345,7 +315,6 @@ const IndexDashboard: React.FC = () => {
       dataIndex: 'name',
       search: { transform: (value: string) => setSearchName(value) },
       render: (dom, entity) => {
-        const hasDebugContainer = entity.spec?.ephemeralContainers?.length || 0 ? true : false;
         const hasStorage = entity.spec?.volumes?.filter((item) => item.persistentVolumeClaim).length || 0 ? true : false;
         return (
           <>
@@ -358,22 +327,15 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 if (namespace) {
-                  window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/pods/${entity?.metadata?.name}`);
+                  window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/pods/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
                 } else {
                   window.open(
-                    normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/pods/${entity?.metadata?.name}`),
+                    appendKubernetesViewQuery(`/kubernetes/namespace/workload/pods/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                     '_blank',
                   );
                 }
               }}
             >
-              {hasDebugContainer ? (
-                <>
-                  &nbsp;&nbsp;
-                  <BugOutlined style={{ color: colorPrimary }} />
-                  &nbsp;&nbsp;
-                </>
-              ) : null}
               {entity?.metadata?.name}
             </a>
           </>
@@ -865,7 +827,7 @@ const IndexDashboard: React.FC = () => {
           nodes.unshift(
             <a
               onClick={() => {
-                window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${record?.metadata?.namespace}/workload/pods/${record?.metadata?.name}/update`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/pods/${record?.metadata?.name}/update`, { cluster: cluster, namespace: record?.metadata?.namespace });
               }}
             >
               <EditOutlined style={{ color: colorPrimary }} />
@@ -990,29 +952,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >
@@ -1023,7 +963,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/create/text`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/create/text`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.text" />

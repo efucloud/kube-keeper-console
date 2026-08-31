@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, InsertRowBelowOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -12,10 +12,9 @@ import Continue from '@/pages/kubernetes/components/continue';
 import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 
 import { getClusterResource } from '@/utils/cluster';
@@ -40,7 +39,6 @@ const IndexDashboard: React.FC = () => {
   const [remainingItemCount, setRemainingItemCount] = useState<number>(0);
   const [dataSource, setDataSource] = useState<IEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const formRef = useRef<ProFormInstance>(undefined);
   const debouncedNamespaceChange = debounce((value) => { setSearchNamespace(value); }, 1000);
   const [selectedNamespace, setSelectedNamespace] = useState<string>(namespace);
@@ -111,37 +109,10 @@ const IndexDashboard: React.FC = () => {
     await syncClusterNamespace({ cluster });
     message.success(intl.formatMessage({ id: 'cluster.namespace.sync.success' }));
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<IEvent>[] = [
     {
       title: <FormattedMessage id="cluster.namespace" />,
@@ -196,7 +167,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/monitor/events`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/monitor/events`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -390,29 +361,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
           </Space>

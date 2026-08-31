@@ -11,7 +11,6 @@ import '@xterm/xterm/css/xterm.css'; // 必须引入样式
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { Button, Drawer, Input, Row, Select, Space } from 'antd';
 import { getColorPrimary, getToken } from '@/utils/global';
-import { BugOutlined } from '@ant-design/icons';
 import debounce from 'lodash/debounce';
 import { ActionType, ProList } from '@ant-design/pro-components';
 import { BuiltinShellCommandDetail } from '@/services/builtin_shell_command';
@@ -212,8 +211,6 @@ export const PodContainerTerminal: React.FC<TerminalProps> = (props) => {
           }}
         />
         <a style={{ color: colorPrimary }} onClick={() => { setBuiltinCommandVisible(true) }}>{intl.formatMessage({ id: 'builtin_command' })}</a>
-        <BugOutlined style={{ color: colorPrimary }} />
-        <span><FormattedMessage id='cluster.pod.terminal.tootip' key='tootip' /></span>
       </Space>
       <Row gutter={16}>
         <div

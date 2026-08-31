@@ -15,7 +15,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const resourceGroup = getClusterApiVersions(cluster, ['policy/v1'], 'PodDisruptionBudget');
 const [info, setInfo] = useState<IPodDisruptionBudget>();
   const baseApi = `apis/${resourceGroup.groupVersion}/namespaces/${namespace || '-'}/poddisruptionbudgets`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace || '-'}/policy/poddisruptionbudgets`;
+  const baseAddress = `/kubernetes/namespace/policy/poddisruptionbudgets`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

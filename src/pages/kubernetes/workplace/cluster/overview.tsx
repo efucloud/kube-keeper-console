@@ -8,7 +8,7 @@ import MetricsLiquid from "@/pages/kubernetes/components/metrics_liquid";
 import dayjs from "dayjs";
 import MetricsStatistic from "@/pages/kubernetes/components/metrics_statistic";
 import MetricsPie from "@/pages/kubernetes/components/metrics_pie";
-import { getColorPrimary, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary } from '@/utils/global';
 
 export interface clusterInfo {
   clusterCode: string;
@@ -222,7 +222,7 @@ export const ClusterConnect: React.FC<clusterConnectInfo> = ({ clusterCode, redi
   const colorPrimary = getColorPrimary();
   const intl = useIntl();
   const targetPath =
-    redirectPath || `/kubernetes/cluster/${clusterCode}/dashboard/overview`;
+    redirectPath || appendKubernetesViewQuery(`/kubernetes/cluster/dashboard/overview`, { cluster: clusterCode });
 
   const clusterVersion = async () => {
     const data = (await clusterConnectCheck({
@@ -240,7 +240,7 @@ export const ClusterConnect: React.FC<clusterConnectInfo> = ({ clusterCode, redi
       {connectedAble ? (
         <a
           onClick={() => {
-            window.location.href = normalizeKubernetesPath(targetPath);
+            window.location.href = appendKubernetesViewQuery(targetPath);
           }}
         >
           <ExportOutlined />

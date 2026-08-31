@@ -17,8 +17,8 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const [info, setInfo] = useState<Service>();
   const BaseApi = `api/v1/namespaces/${namespace}/services`;
   const BaseAddress = namespace
-    ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/networks/services`
-    : `/kubernetes/cluster/${cluster}/networks/services`;
+    ? `/kubernetes/namespace/networks/services`
+    : `/kubernetes/cluster/networks/services`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create; // update or create
   const name = mode === Create ? '' : params.name || ''; // resource name

@@ -240,22 +240,6 @@ export interface ViewInformation {
 const KUBERNETES_ROOT_PATH = "/kubernetes";
 const STATIC_CLUSTER_PATH = "/kubernetes/cluster";
 const STATIC_NAMESPACE_PATH = "/kubernetes/namespace";
-const STATIC_CLUSTER_SEGMENTS = new Set([
-  "terminal",
-  "dashboard",
-  "permission",
-  "node",
-  "namespace",
-  "workload",
-  "config",
-  "networks",
-  "access",
-  "storage",
-  "policy",
-  "monitor",
-  "customresourcedefinitions",
-  "apiservices",
-]);
 
 const getViewQueryValue = (value?: string | null) => {
   if (!value || value === "-") {
@@ -301,73 +285,6 @@ export const appendKubernetesViewQuery = (
   return query ? `${pathname}?${query}` : pathname;
 };
 
-export const normalizeKubernetesPath = (path: string) => {
-  if (!path || !path.startsWith(KUBERNETES_ROOT_PATH)) {
-    return path;
-  }
-
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost";
-  const url = new URL(path, baseUrl);
-  const segments = url.pathname.split("/").filter(Boolean);
-
-  if (url.pathname.startsWith(STATIC_NAMESPACE_PATH)) {
-    return appendKubernetesViewQuery(
-      `${url.pathname}${url.search}`,
-      {
-        cluster: url.searchParams.get("cluster") || getCurrentViewInfo().cluster,
-        namespace: url.searchParams.get("namespace") || getCurrentViewInfo().namespace,
-      }
-    );
-  }
-
-  if (
-    url.pathname === STATIC_CLUSTER_PATH ||
-    (url.pathname.startsWith(`${STATIC_CLUSTER_PATH}/`) &&
-      segments[2] &&
-      STATIC_CLUSTER_SEGMENTS.has(segments[2]))
-  ) {
-    return appendKubernetesViewQuery(
-      `${url.pathname}${url.search}`,
-      {
-        cluster: url.searchParams.get("cluster") || getCurrentViewInfo().cluster,
-      }
-    );
-  }
-
-  if (segments.length < 3 || segments[0] !== "kubernetes" || segments[1] !== "cluster") {
-    return path;
-  }
-
-  const legacyCluster = segments[2];
-  if (segments[3] === "namespace") {
-    const legacyNamespace = segments[4] || "";
-    const restPath = segments.slice(5).join("/");
-    const pathname = restPath
-      ? `${STATIC_NAMESPACE_PATH}/${restPath}`
-      : `${STATIC_NAMESPACE_PATH}/dashboard/overview`;
-
-    return appendKubernetesViewQuery(
-      `${pathname}${url.search}`,
-      {
-        cluster: legacyCluster,
-        namespace: legacyNamespace,
-      }
-    );
-  }
-
-  const restPath = segments.slice(3).join("/");
-  const pathname = restPath
-    ? `${STATIC_CLUSTER_PATH}/${restPath}`
-    : `${STATIC_CLUSTER_PATH}`;
-
-  return appendKubernetesViewQuery(
-    `${pathname}${url.search}`,
-    {
-      cluster: legacyCluster,
-    }
-  );
-};
-
 export const getCurrentViewInfo = (): ViewInformation => {
   const info = {
     cluster: "",
@@ -379,8 +296,6 @@ export const getCurrentViewInfo = (): ViewInformation => {
   if (window.location.pathname.startsWith("/kubernetes")) {
     const searchParams = new URLSearchParams(window.location.search);
     const pathname = window.location.pathname;
-    const pathSegments = pathname.split("/").filter(Boolean);
-    const currentSegment = pathSegments[2];
 
     if (pathname.startsWith(STATIC_NAMESPACE_PATH)) {
       info.cluster = getViewQueryValue(searchParams.get("cluster"));
@@ -390,27 +305,10 @@ export const getCurrentViewInfo = (): ViewInformation => {
       return info;
     }
 
-    if (
-      pathname === STATIC_CLUSTER_PATH ||
-      (pathname.startsWith(STATIC_CLUSTER_PATH) &&
-        currentSegment &&
-        STATIC_CLUSTER_SEGMENTS.has(currentSegment))
-    ) {
+    if (pathname.startsWith(STATIC_CLUSTER_PATH)) {
       info.cluster = getViewQueryValue(searchParams.get("cluster"));
-      info.namespace = getViewQueryValue(searchParams.get("namespace"));
       info.isCluster = true;
       return info;
-    }
-
-    const sp = pathname.split("/");
-    if (sp?.[2] === "cluster") {
-      info.cluster = getViewQueryValue(sp?.[3]);
-      info.isCluster = true;
-    }
-    if (sp?.[4] === "namespace" && sp?.[5]) {
-      info.isNamespace = true;
-      info.namespace = getViewQueryValue(sp[5]);
-      info.isCluster = false;
     }
   }
   return info;

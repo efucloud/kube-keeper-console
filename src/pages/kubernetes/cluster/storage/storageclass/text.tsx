@@ -15,7 +15,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const resourceGroup = getClusterApiVersions(cluster, ['storage.k8s.io/v1beta1', 'storage.k8s.io/v1'], 'StorageClass');
 const [info, setInfo] = useState<IStorageClass>();
   const baseApi = `apis/${resourceGroup.groupVersion}/storageclasses`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/storage/storageclass`;
+  const baseAddress = `/kubernetes/cluster/storage/storageclass`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

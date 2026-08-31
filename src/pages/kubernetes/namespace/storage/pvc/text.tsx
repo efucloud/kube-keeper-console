@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<IPersistentVolumeClaim>();
   const baseApi = `api/v1/namespaces/${namespace || '-'}/persistentvolumeclaims`;
-  const baseAddress = namespace ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/storage/pvc` : `/kubernetes/cluster/${cluster}/storage/persistentvolumeclaim`;
+  const baseAddress = namespace ? `/kubernetes/namespace/storage/pvc` : `/kubernetes/cluster/storage/persistentvolumeclaim`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

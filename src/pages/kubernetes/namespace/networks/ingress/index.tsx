@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -11,10 +11,9 @@ import type { IntlShape } from 'react-intl';
 import Continue from '@/pages/kubernetes/components/continue';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
-import { getClusterApiVersions, getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getClusterApiVersions, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 
 import AICopilot from '@/pages/kubernetes/components/ai';
@@ -28,10 +27,9 @@ const IndexDashboard: React.FC = () => {
   const formRef = useRef<ProFormInstance>(undefined);
   const [dataSource, setDataSource] = useState<IIngress[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
-  let BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/networks/ingresses`;
+  let BaseAddress = `/kubernetes/namespace/networks/ingresses`;
   if (!namespace || namespace === '' || namespace === '-') {
-    BaseAddress = `/kubernetes/cluster/${cluster}/networks/ingresses`;
+    BaseAddress = `/kubernetes/cluster/networks/ingresses`;
   }
   const resourceGroup = getClusterApiVersions(cluster, ['networking.k8s.io/v1', 'extensions/v1', 'extensions/v1beta1'], 'Ingress');
   const [expandInfo, setExpandInfo] = useState<boolean>(false);
@@ -133,38 +131,10 @@ const IndexDashboard: React.FC = () => {
     actionRef.current?.reload();
     return true;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
 
   const columns: ProColumns<IIngress>[] = [
     {
@@ -220,7 +190,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/networks/ingresses`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/networks/ingresses`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -235,7 +205,7 @@ const IndexDashboard: React.FC = () => {
       dataIndex: 'name',
       search: { transform: (value: string) => setSearchName(value) },
       render: (dom, entity) => {
-        return <a href={`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/networks/ingresses/${entity?.metadata?.name}`}>{entity?.metadata?.name}</a>
+        return <a href={appendKubernetesViewQuery(`/kubernetes/namespace/networks/ingresses/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace })}>{entity?.metadata?.name}</a>
       },
     },
     {
@@ -271,7 +241,7 @@ const IndexDashboard: React.FC = () => {
                     {path.backend?.service?.name}:
                     {path.backend?.service?.port?.number}&nbsp;
                   </span>
-                  <a onClick={() => window.open(normalizeKubernetesPath(address))}>{address}</a>
+                  <a onClick={() => window.open(appendKubernetesViewQuery(address))}>{address}</a>
                 </div>,
               );
             });
@@ -303,7 +273,7 @@ const IndexDashboard: React.FC = () => {
         const nodes = [
           <a
             onClick={() => {
-              window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${record?.metadata?.namespace}/networks/ingresses/${record?.metadata?.name}/update`);
+              window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/networks/ingresses/${record?.metadata?.name}/update`, { cluster: cluster, namespace: record?.metadata?.namespace });
             }}
           >
             <EditOutlined style={{ color: colorPrimary }} />
@@ -400,29 +370,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
 
@@ -438,7 +386,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create-text"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/create/text`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/create/text`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.text" />
@@ -449,7 +397,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create-form"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/form/create`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/form/create`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.form" />

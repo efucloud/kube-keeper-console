@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, EditOutlined, InsertRowBelowOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -11,9 +11,8 @@ import type { IntlShape } from 'react-intl';
 import Continue from '@/pages/kubernetes/components/continue';
 import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { getClusterResource } from '@/utils/cluster';
 import ResourceEditor from '@/pages/kubernetes/components/resource_editor';
 
@@ -24,7 +23,6 @@ const IndexDashboard: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [dataSource, setDataSource] = useState<IMutatingWebhookConfiguration[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const formRef = useRef<ProFormInstance>(undefined);
   const access = useAccess();
   const { cluster } = getCurrentViewInfo();
@@ -105,38 +103,10 @@ const IndexDashboard: React.FC = () => {
     actionRef.current?.reload();
     return true;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: 'apis/admissionregistration.k8s.io/v1/mutatingwebhookconfigurations',
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
 
   const columns: ProColumns<IMutatingWebhookConfiguration>[] = [
     {
@@ -335,7 +305,7 @@ const IndexDashboard: React.FC = () => {
           <a
             key="edit"
             onClick={() => {
-              window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/config/mutatingwebhookconfigurations/${record?.metadata?.name}/update`);
+              window.location.href = appendKubernetesViewQuery(`/kubernetes/cluster/config/mutatingwebhookconfigurations/${record?.metadata?.name}/update`, { cluster: cluster });
             }}
           >
             <EditOutlined style={{ color: colorPrimary }} />
@@ -434,29 +404,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >
@@ -467,7 +415,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/config/mutatingwebhookconfigurations/create/text`)
+                  window.location.href = appendKubernetesViewQuery(`/kubernetes/cluster/config/mutatingwebhookconfigurations/create/text`, { cluster: cluster })
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.text" />

@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, EditOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -14,11 +14,10 @@ import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import PatchLabels from '@/pages/kubernetes/components/patch_labels';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
 import { getClusterResource } from '@/utils/cluster';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 
 import AICopilot from '@/pages/kubernetes/components/ai';
@@ -31,7 +30,6 @@ const IndexDashboard: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<IResourceQuota[]>([]);
   const [dataSource, setDataSource] = useState<IResourceQuota[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const formRef = useRef<ProFormInstance>(undefined);
   const [expandInfo, setExpandInfo] = useState<boolean>(false);
   const [patchLabelVisible, setPatchLabelVisible] = useState<boolean>(false);
@@ -180,38 +178,10 @@ const IndexDashboard: React.FC = () => {
     });
     return nodes;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<IResourceQuota>[] = [
     {
       title: <FormattedMessage id="cluster.namespace" />,
@@ -266,7 +236,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/config/resourcequotas`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/config/resourcequotas`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -285,7 +255,7 @@ const IndexDashboard: React.FC = () => {
           <>
             <a
               onClick={() => {
-                window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/config/resourcequotas/${entity?.metadata?.name}/update`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/config/resourcequotas/${entity?.metadata?.name}/update`, { cluster: cluster, namespace: entity?.metadata?.namespace });
               }}
             >
               {entity?.metadata?.name}
@@ -480,7 +450,7 @@ const IndexDashboard: React.FC = () => {
           <a
             key="edit"
             onClick={() => {
-              window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${record?.metadata?.namespace}/config/resourcequotas/${record?.metadata?.name}/update`);
+              window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/config/resourcequotas/${record?.metadata?.name}/update`, { cluster: cluster, namespace: record?.metadata?.namespace });
             }}
           >
             <EditOutlined style={{ color: colorPrimary }} />
@@ -585,29 +555,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >
@@ -622,9 +570,9 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(namespace
-                    ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/config/resourcequotas/create/text`
-                    : `/kubernetes/cluster/${cluster}/config/resourcequotas/create/text`);
+                  window.location.href = appendKubernetesViewQuery(namespace
+                    ? appendKubernetesViewQuery(`/kubernetes/namespace/config/resourcequotas/create/text`, { cluster: cluster, namespace: namespace })
+                    : appendKubernetesViewQuery(`/kubernetes/cluster/config/resourcequotas/create/text`, { cluster: cluster }));
                 }}
               >
                 <FormattedMessage id="pages.operation.create" />

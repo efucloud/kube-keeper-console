@@ -43,7 +43,6 @@ export default {
   "menu.settings.dict": "Data Dictionary",
   "menu.settings.integrationGit": "GitLab Repository",
   "menu.settings.BuiltinCommand": "Menu Settings Built-in Command",
-  "menu.settings.integrationDebugContainer": "Debug Container",
   "menu.settings.builtinClusterRoleTemplate": "Cluster Roles",
   "menu.dashboard.workload": "Workload",
   "menu.dashboard.workspace": "Workspace",

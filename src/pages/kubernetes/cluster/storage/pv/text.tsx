@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster } = getCurrentViewInfo();
   const [info, setInfo] = useState<IPersistentVolume>();
   const baseApi = `api/v1/persistentvolumes`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/storage/persistentvolume`;
+  const baseAddress = `/kubernetes/cluster/storage/persistentvolume`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

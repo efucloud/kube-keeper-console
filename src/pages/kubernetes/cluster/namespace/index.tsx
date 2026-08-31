@@ -1,4 +1,4 @@
-import { CheckCircleFilled, CloseCircleOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, UnorderedListOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleOutlined, DeleteOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, UnorderedListOutlined, UsergroupAddOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { ModalForm, PageContainer, ProDescriptions, ProFormDateTimeRangePicker, ProFormDependency, ProFormSelect, ProFormSwitch, ProFormText, ProFormTextArea, ProTable, StepsForm } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -15,12 +15,11 @@ import Continue from '@/pages/kubernetes/components/continue';
 import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import PatchLabels from '@/pages/kubernetes/components/patch_labels';
 import { clusterGetProxy, clusterPostProxy, clusterPutProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 import type { ClusterRoleTemplate, ClusterRoleTemplateList, NamespaceAuthorizeByTemplate } from '@/services/cluster_role_template';
 import { listClusterRoleTemplate } from '@/services/cluster_role_template.api';
 import { syncClusterNamespace } from '@/services/cluster.api';
 import { getClusterResource } from '@/utils/cluster';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import AICopilot from '@/pages/kubernetes/components/ai';
 import FormAnnotation from '@/pages/kubernetes/components/form_annotation';
 import FormLabel from '@/pages/kubernetes/components/form_label';
@@ -80,7 +79,6 @@ const IndexDashboard: React.FC = () => {
   const [dataSource, setDataSource] = useState<INamespace[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [watch, setWatch] = useState<boolean>(false);
   const [createVisible, setCreateVisible] = useState<boolean>(false);
   const [createdNamespace, setCreatedNamespace] = useState<INamespace>();
   const [activeKey, setActiveKey] = useState<string>('autoCreateRoles');
@@ -298,38 +296,10 @@ const IndexDashboard: React.FC = () => {
     })
     return nodes;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: clusterResourceAddress,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<INamespace>[] = [
     {
       title: intl.formatMessage({ id: 'cluster.resource.name' }),
@@ -347,7 +317,7 @@ const IndexDashboard: React.FC = () => {
                 <a
                   onClick={() => {
                     window.open(
-                      normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.name}/dashboard/overview`),
+                      appendKubernetesViewQuery(`/kubernetes/namespace/dashboard/overview`, { cluster: cluster, namespace: entity?.metadata?.name }),
                     );
                   }}
                 >
@@ -367,7 +337,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.name}/dashboard/overview`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/dashboard/overview`, { cluster: cluster, namespace: entity?.metadata?.name }),
                 );
               }}
             >
@@ -812,29 +782,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => syncNamespace()}>

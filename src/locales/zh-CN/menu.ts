@@ -43,7 +43,6 @@ export default {
   "menu.settings.dict": "数据字典",
   "menu.settings.integrationGit": "Git仓库",
   "menu.settings.BuiltinCommand": "快捷命令",
-  "menu.settings.integrationDebugContainer": "调试容器",
   "menu.settings.builtinClusterRoleTemplate": "集群角色",
   "menu.dashboard.workload": "工作负载",
   "menu.dashboard.workspace": "工作空间",

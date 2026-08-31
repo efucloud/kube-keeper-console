@@ -15,7 +15,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const resourceGroup = getClusterApiVersions(cluster, ['networking.k8s.io/v1'], 'NetworkPolicy');
 const [info, setInfo] = useState<INetworkPolicy>();
   const baseApi = `apis/${resourceGroup.groupVersion}/namespaces/${namespace || '-'}/networkpolicies`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace || '-'}/policy/networkpolicy`;
+  const baseAddress = `/kubernetes/namespace/policy/networkpolicy`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

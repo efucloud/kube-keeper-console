@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -13,10 +13,9 @@ import Continue from '@/pages/kubernetes/components/continue';
 import FilterSelector from '@/pages/kubernetes/components/filter_selector';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
-import { getClusterApiVersions, getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getClusterApiVersions, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 
 import AICopilot from '@/pages/kubernetes/components/ai';
@@ -30,7 +29,6 @@ const IndexDashboard: React.FC = () => {
   const [expandInfo, setExpandInfo] = useState<boolean>(false);
   const [dataSource, setDataSource] = useState<IHorizontalPodAutoscaler[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const formRef = useRef<ProFormInstance>(undefined);
   const intl = useIntl();
   const resourceGroup = getClusterApiVersions(cluster, ['autoscaling/v2beta2', 'autoscaling/v2', 'autoscaling/v1'], 'HorizontalPodAutoscaler');
@@ -139,38 +137,10 @@ const IndexDashboard: React.FC = () => {
     });
     return nodes;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<IHorizontalPodAutoscaler>[] = [
     {
       title: <FormattedMessage id="cluster.namespace" />,
@@ -225,7 +195,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/policy/hpa`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/policy/hpa`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -240,7 +210,7 @@ const IndexDashboard: React.FC = () => {
       dataIndex: 'name',
       search: { transform: (value: string) => setSearchName(value) },
       render: (dom, entity) => {
-        return <a onClick={() => { window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/policy/hpa/${entity?.metadata?.name}/update`); }}>{entity?.metadata?.name}</a>;
+        return <a onClick={() => { window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/policy/hpa/${entity?.metadata?.name}/update`, { cluster: cluster, namespace: entity?.metadata?.namespace }); }}>{entity?.metadata?.name}</a>;
       },
     },
     {
@@ -530,29 +500,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >
@@ -567,7 +515,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${namespace}/policy/hpa/create/text`);
+                  window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/policy/hpa/create/text`, { cluster: cluster, namespace: namespace });
                 }}
               >
                 <FormattedMessage id="pages.operation.create" />

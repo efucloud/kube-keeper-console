@@ -16,7 +16,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<Secret>();
   const BaseApi = `api/v1/namespaces/${namespace}/secrets`;
-  const BaseAddress = namespace ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/config/secrets` : `/kubernetes/cluster/${cluster}/config/secrets`
+  const BaseAddress = namespace ? `/kubernetes/namespace/config/secrets` : `/kubernetes/cluster/config/secrets`
   const params = useParams();
   const mode = params.action === Update ? Update : Create; // update or create
   const name = mode === Create ? '' : params.name || '' // resource name

@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, type ProFormInstance, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -15,11 +15,10 @@ import PatchLabels from '@/pages/kubernetes/components/patch_labels';
 import ResourceEditor from '@/pages/kubernetes/components/resource_editor';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
 import { getClusterResource } from '@/utils/cluster';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 
 import AICopilot from '@/pages/kubernetes/components/ai';
@@ -32,7 +31,6 @@ const IndexDashboard: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<IPersistentVolumeClaim[]>([]);
   const [dataSource, setDataSource] = useState<IPersistentVolumeClaim[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
   const formRef = useRef<ProFormInstance>(undefined);
   // kubectl get pods --all-namespaces -o wide --field-selector 'jsonPath($.spec.volumes[*].persistentVolumeClaim.claimName)==my-persistent-volume-claim'
   const [expandInfo, setExpandInfo] = useState<boolean>(false);
@@ -185,38 +183,10 @@ const IndexDashboard: React.FC = () => {
 
     return nodes;
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
 
   const columns: ProColumns<IPersistentVolumeClaim>[] = [
     {
@@ -272,7 +242,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/storage/persistentvolumeclaim`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/storage/persistentvolumeclaim`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -691,29 +661,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >
@@ -728,9 +676,9 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(namespace
-                    ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/storage/pvc/create/text`
-                    : `/kubernetes/cluster/${cluster}/storage/persistentvolumeclaim/create/text`);
+                  window.location.href = appendKubernetesViewQuery(namespace
+                    ? appendKubernetesViewQuery(`/kubernetes/namespace/storage/pvc/create/text`, { cluster: cluster, namespace: namespace })
+                    : appendKubernetesViewQuery(`/kubernetes/cluster/storage/persistentvolumeclaim/create/text`, { cluster: cluster }));
                 }}
               >
                 <FormattedMessage id="pages.operation.create" />

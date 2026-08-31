@@ -7,7 +7,7 @@ import type {
 import { useRef, useState } from 'react';
 import type { IntlShape } from 'react-intl';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { getColorPrimary, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary } from '@/utils/global';
 export type RenderServiceProps = {
   cluster: string;
   namespace: string;
@@ -77,7 +77,7 @@ export const RelatedServices: React.FC<RenderServiceProps> = (props) => {
           <>
             <a
               onClick={() => {
-                window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/networks/services/${entity?.metadata?.name}`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/networks/services/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
               }}
             >
               {entity?.metadata?.name}

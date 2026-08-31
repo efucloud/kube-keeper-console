@@ -557,7 +557,6 @@ export default {
   "cluster.resource.container.log": "Log",
   "cluster.resource.monitor": "Monitor",
   "cluster.resource.container.terminal": "Terminal",
-  "cluster.resource.container.terminal.debug": "Add Debug Container",
   "cluster.resource.container.terminal.command": "Terminal Command",
   "cluster.resource.container.terminal.command.default": "Default command: sh",
   "cluster.terminal.expireAt": "Expire At",
@@ -916,9 +915,6 @@ export default {
     "Cluster Resource Ingress Tls Hosts Add",
   "cluster.resource.ingress.rules.http.path":
     "Cluster Resource Ingress Rules Http Path",
-  "cluster.resource.watch.failed": "Failed",
-  "cluster.resource.watch.start.failed": "Failed",
-  "cluster.resource.watch.status": "Watching",
   "cluster.resource.images.change": "Cluster Resource Images Change",
   "cluster.resource.pod.resource.resize":
     "Cluster Resource Pod Resource Resize",

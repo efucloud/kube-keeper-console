@@ -15,7 +15,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const resourceGroup = getClusterApiVersions(cluster, ['autoscaling/v2beta2', 'autoscaling/v2', 'autoscaling/v1'], 'HorizontalPodAutoscaler');
 const [info, setInfo] = useState<IHorizontalPodAutoscaler>();
   const baseApi = `apis/${resourceGroup.groupVersion}/namespaces/${namespace || '-'}/horizontalpodautoscalers`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace || '-'}/policy/hpa`;
+  const baseAddress = `/kubernetes/namespace/policy/hpa`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

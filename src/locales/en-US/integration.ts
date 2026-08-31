@@ -14,10 +14,5 @@ export default {
   "integration.git.scope.tooltip":
     "Controls whether this command is visible globally or only in current tenant",
   "integration.git.extend.description": "Integration Git Extend description",
-  "integration.debug.container": "Debug Container",
-  "integration.debug.container.select": "Select Debug Container",
-  "integration.debug.container.name": "Name",
-  "integration.debug.container.description": "Description",
-  "integration.debug.container.content": "Container Content",
   "integration.builtin.command": "Built-in Command"
 };

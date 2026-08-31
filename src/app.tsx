@@ -9,7 +9,7 @@ import { errorConfig } from './requestErrorConfig';
 import { getUserinfo } from '@/services/oauth.api';
 import type { AuthedUserInfo } from '@/services/common.d';
 const indexPath = '/index';
-import { appendKubernetesViewQuery, getCurrentViewInfo, getI18nLanguage, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getCurrentViewInfo, getI18nLanguage } from '@/utils/global';
 import buildAccess from './access';
 import 'monaco-editor/min/vs/editor/editor.main.css';
 import * as monaco from 'monaco-editor';
@@ -229,7 +229,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
-      const normalizedKubernetesPath = normalizeKubernetesPath(`${location.pathname}${location.search}`);
+      const normalizedKubernetesPath = appendKubernetesViewQuery(`${location.pathname}${location.search}`);
       if (normalizedKubernetesPath !== `${location.pathname}${location.search}`) {
         history.replace(normalizedKubernetesPath);
         return;

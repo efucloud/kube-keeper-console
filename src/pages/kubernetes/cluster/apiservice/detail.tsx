@@ -1,4 +1,4 @@
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { PageContainer, ProDescriptions } from "@ant-design/pro-components";
 import { useParams, useIntl, FormattedMessage } from "@umijs/max";
 import { useEffect, useState } from "react";
@@ -33,7 +33,7 @@ const DetailView: React.FC = () => {
     const params = { cluster, address: BaseApi };
     await clusterDeleteProxy(params);
     message.success(intl.formatMessage({ id: 'cluster.pages.operation.success' }));
-    window.location.pathname = normalizeKubernetesPath(BaseAddress);
+    window.location.href = appendKubernetesViewQuery(BaseAddress);
     return true;
   };
 

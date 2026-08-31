@@ -14,7 +14,7 @@ import { Card } from 'antd';
 const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<Deployment>();
-  const BaseAddress = namespace ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/deployments` : `/kubernetes/cluster/${cluster}/workload/deployments`
+  const BaseAddress = namespace ? `/kubernetes/namespace/workload/deployments` : `/kubernetes/cluster/workload/deployments`
   const params = useParams();
   const mode = params.action === Update ? Update : Create; // update or create
   const name = mode === Create ? '' : params.name || '' // resource name

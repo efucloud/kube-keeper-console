@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 
 export const WorkplaceIndex: React.FC = () => {
   const colorPrimary = getColorPrimary();
@@ -11,7 +11,7 @@ export const WorkplaceIndex: React.FC = () => {
         <a
           style={{ color: colorPrimary }}
           onClick={() => {
-            window.location.href = normalizeKubernetesPath(`/workplace`);
+            window.location.href = appendKubernetesViewQuery(`/workplace`);
           }}
         >
           <FormattedMessage id="pages.go.workplace" key='workplace' />

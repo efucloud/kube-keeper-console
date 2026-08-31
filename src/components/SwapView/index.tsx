@@ -5,7 +5,7 @@ import debounce from 'lodash/debounce';
 import React, { useEffect, useState } from 'react';
 import type { ClusterServerGroup, UserAccessCluster, UserAccessClusterList } from '@/services/kubernetes';
 import { canAccessClusterNamespaces, canAccessClusters } from '@/services/personal.api';
-import { appendKubernetesViewQuery, getCurrentViewInfo, normalizeKubernetesPath, saveClusterApiVersions, saveClusterFeatures, saveClusterVersion } from '@/utils/global';
+import { appendKubernetesViewQuery, getCurrentViewInfo, saveClusterApiVersions, saveClusterFeatures, saveClusterVersion } from '@/utils/global';
 import { ClusterNamespaceDetail, ClusterNamespaceDetailList } from "@/services/cluster_namespace";
 import { syncClusterNamespace } from "@/services/cluster.api";
 import { clusterServerGroups, getClusterInfo } from "@/services/cluster.api";
@@ -92,7 +92,7 @@ export const SwapView: React.FC = () => {
   }, [searchCluster]);
 
   const onClusterSelected = (value: string) => {
-    window.location.href = normalizeKubernetesPath(appendKubernetesViewQuery('/kubernetes/cluster/dashboard/overview', { cluster: value }));
+    window.location.href = appendKubernetesViewQuery('/kubernetes/cluster/dashboard/overview', { cluster: value });
   };
   if (isCluster && cluster && cluster !== '') {
     return (
@@ -119,7 +119,7 @@ export const SwapView: React.FC = () => {
 
   } else if (namespace !== undefined && namespace !== null && namespace) {
     return <Space separator={<Divider orientation="vertical" />}>
-      <div><FormattedMessage id="cluster" />:&nbsp;<a onClick={() => window.open(normalizeKubernetesPath(appendKubernetesViewQuery('/kubernetes/cluster/dashboard/overview', { cluster })))}>{cluster}</a></div>
+      <div><FormattedMessage id="cluster" />:&nbsp;<a onClick={() => window.open(appendKubernetesViewQuery('/kubernetes/cluster/dashboard/overview', { cluster }))}>{cluster}</a></div>
       <div
         style={{ display: 'flex', alignItems: 'center' }}>
         {/* <Access accessible={access.clusterAccess === true} > */}
@@ -132,15 +132,15 @@ export const SwapView: React.FC = () => {
           defaultValue={namespace}
           style={{ minWidth: 200 }}
           onChange={(value) => {
-            const currentPath = normalizeKubernetesPath(`${window.location.pathname}${window.location.search}`).split('?')[0];
+            const currentPath = appendKubernetesViewQuery(`${window.location.pathname}${window.location.search}`).split('?')[0];
             const targetPath = currentPath.startsWith('/kubernetes/namespace/')
               ? currentPath
               : '/kubernetes/namespace/dashboard/overview';
 
-            window.location.href = normalizeKubernetesPath(appendKubernetesViewQuery(targetPath, {
+            window.location.href = appendKubernetesViewQuery(targetPath, {
               cluster,
               namespace: value,
-            }));
+            });
           }}
           popupRender={(menu) => {
             if (userNamespaces.length == 0) {

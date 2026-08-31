@@ -16,7 +16,7 @@ import { syncClusterNamespace } from '@/services/cluster.api';
 // 非多租户版本：引入 personal.api 中的权限方法
 import { canAccessClusterNamespaces } from '@/services/personal.api';
 import { useIntl, FormattedMessage } from '@umijs/max';
-import { normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery } from '@/utils/global';
 
 export type ResourceJsonOrYamlFormProps = {
   key: string;
@@ -238,7 +238,7 @@ const ResourceJsonOrYamlForm: React.FC<ResourceJsonOrYamlFormProps> = (props) =>
         ? (props.detailPage ? `${props.detailPage}` : props.listPage)
         : (props.detailPage ? `${props.detailPage}/${requestData.metadata.name}` : props.listPage);
 
-      window.location.href = normalizeKubernetesPath(targetUrl);
+      window.location.href = appendKubernetesViewQuery(targetUrl);
     } catch (error: any) {
       console.error('Save failed:', error);
       message.error(`操作失败：${error.message || '未知错误'}`);

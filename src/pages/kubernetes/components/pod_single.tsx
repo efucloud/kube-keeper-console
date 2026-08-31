@@ -30,7 +30,7 @@ export const PodSingle: React.FC<PodSingleProps> = (props) => {
   const intl = useIntl();
 
   const BaseApi = `api/v1/namespaces/${props.namespace}/pods`;
-  const BaseAddress = `/kubernetes/cluster/${props.cluster}/namespace/${props.namespace}/workload/pods`
+  const BaseAddress = `/kubernetes/namespace/workload/pods`
   const getInfo = async () => {
     let params = { cluster: props.cluster, address: `${BaseApi}/${props.name}` } as Record<string, any>;
     const res = await clusterGetProxy(params) as Pod;

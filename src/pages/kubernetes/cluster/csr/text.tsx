@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster } = getCurrentViewInfo();
   const [info, setInfo] = useState<ICertificateSigningRequest>();
   const baseApi = `apis/certificates.k8s.io/v1/certificatesigningrequests`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/access/certificatesigningrequests`;
+  const baseAddress = `/kubernetes/cluster/access/certificatesigningrequests`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

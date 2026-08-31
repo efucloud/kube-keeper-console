@@ -16,7 +16,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
 
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<StatefulSet>();
-  const BaseAddress = namespace ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/statefulsets` : `/kubernetes/cluster/${cluster}/workload/statefulsets`
+  const BaseAddress = namespace ? `/kubernetes/namespace/workload/statefulsets` : `/kubernetes/cluster/workload/statefulsets`
   const params = useParams();
   const mode = params.action === Update ? Update : Create; // update or create
   const name = mode === Create ? '' : params.name || ''

@@ -1,4 +1,4 @@
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { PageContainer, ProColumns, ProDescriptions, ProTable } from "@ant-design/pro-components";
 import { useParams, useIntl, FormattedMessage } from "@umijs/max";
 import { useEffect, useState } from "react";
@@ -38,7 +38,7 @@ const DetailView: React.FC = () => {
   const [baseActive, setBaseActive] = useState<string>('base');
   const [containers, setContainers] = useState<string[]>([]);
   const BaseApi = `api/v1/namespaces/${namespace}/pods`;
-  const BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/pods`
+  const BaseAddress = `/kubernetes/namespace/workload/pods`
   const getInfo = async () => {
     let params = { cluster, address: `${BaseApi}/${name}` } as Record<string, any>;
     const res = await clusterGetProxy(params) as Pod;
@@ -75,7 +75,7 @@ const DetailView: React.FC = () => {
     const params = { cluster, address: BaseApi };
     await clusterDeleteProxy(params);
     message.success(intl.formatMessage({ id: 'cluster.pages.operation.success' }));
-    window.location.pathname = normalizeKubernetesPath(BaseAddress);
+    window.location.href = appendKubernetesViewQuery(BaseAddress);
     return true;
   };
   const moreItems = () => {
@@ -97,7 +97,7 @@ const DetailView: React.FC = () => {
       });
       nodes.push({
         key: 'edit',
-        label: <a onClick={() => { window.location.href = normalizeKubernetesPath(`${BaseAddress}/${info.metadata?.name}/update`) }} style={{ color: colorPrimary }}><FormattedMessage id='model.update' /></a>,
+        label: <a onClick={() => { window.location.href = appendKubernetesViewQuery(`${BaseAddress}/${info.metadata?.name}/update`) }} style={{ color: colorPrimary }}><FormattedMessage id='model.update' /></a>,
       });
       nodes.push({
         key: 'annotations',
@@ -288,7 +288,7 @@ const DetailView: React.FC = () => {
     }
   ]
   return (<>
-    {info && <PageContainer header={{ breadcrumb: {}, onBack: () => window.location.href = normalizeKubernetesPath(BaseAddress) }}
+    {info && <PageContainer header={{ breadcrumb: {}, onBack: () => window.location.href = appendKubernetesViewQuery(BaseAddress) }}
       title={info?.metadata?.name}
       subTitle={info?.metadata?.annotations?.['efucloud.com/description'] || ''}
       extra={[

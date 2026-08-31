@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, DockerOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, ReloadOutlined, SaveOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, DockerOutlined, EditOutlined, InsertRowBelowOutlined, LineChartOutlined, MoreOutlined, ReloadOutlined, SaveOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProFormInstance } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -18,11 +18,10 @@ import ResourceEditor from '@/pages/kubernetes/components/resource_editor';
 import { RenderWorkloadMetrics } from '@/pages/kubernetes/components/workload_metrics';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy, clusterPostProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
 import { getClusterResource } from '@/utils/cluster';
-import { getClusterApiVersions, getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getClusterApiVersions, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 import OwnerReferencesView from '@/pages/kubernetes/components/owner_references';
 import PatchImages from '@/pages/kubernetes/components/patch_image';
@@ -61,10 +60,9 @@ const IndexDashboard: React.FC = () => {
 
   const [dataSource, setDataSource] = useState<IStatefulSet[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [watch, setWatch] = useState<boolean>(false);
-  let BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/statefulsets`;
+  let BaseAddress = `/kubernetes/namespace/workload/statefulsets`;
   if (!namespace || namespace === '' || namespace === '-') {
-    BaseAddress = `/kubernetes/cluster/${cluster}/workload/statefulsets`;
+    BaseAddress = `/kubernetes/cluster/workload/statefulsets`;
   }
 
   const debouncedNamespaceChange = debounce((value) => { setSearchNamespace(value); }, 1000);
@@ -271,38 +269,10 @@ const IndexDashboard: React.FC = () => {
     message.success(intl.formatMessage({ id: 'cluster.pages.operation.success' }));
     actionRef.current?.reload();
   };
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
   const columns: ProColumns<IStatefulSet>[] = [
     {
       title: <FormattedMessage id="cluster.namespace" />,
@@ -357,7 +327,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/statefulsets`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/workload/statefulsets`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -396,10 +366,10 @@ const IndexDashboard: React.FC = () => {
                 <a
                   onClick={() => {
                     if (namespace) {
-                      window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/statefulsets/${entity?.metadata?.name}`);
+                      window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/statefulsets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
                     } else {
                       window.open(
-                        normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/statefulsets/${entity?.metadata?.name}`),
+                        appendKubernetesViewQuery(`/kubernetes/namespace/workload/statefulsets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                         '_blank',
                       );
                     }
@@ -428,10 +398,10 @@ const IndexDashboard: React.FC = () => {
               <a
                 onClick={() => {
                   if (namespace) {
-                    window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/statefulsets/${entity?.metadata?.name}`);
+                    window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/statefulsets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
                   } else {
                     window.open(
-                      normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/statefulsets/${entity?.metadata?.name}`),
+                      appendKubernetesViewQuery(`/kubernetes/namespace/workload/statefulsets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                       '_blank',
                     );
                   }
@@ -834,7 +804,7 @@ const IndexDashboard: React.FC = () => {
             <a
               key="edit"
               onClick={() => {
-                window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${record?.metadata?.namespace}/workload/statefulsets/${record?.metadata?.name}/update`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/statefulsets/${record?.metadata?.name}/update`, { cluster: cluster, namespace: record?.metadata?.namespace });
               }}
             >
               <EditOutlined style={{ color: colorPrimary }} />
@@ -948,29 +918,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
 
@@ -986,7 +934,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create-yaml"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/create/text`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/create/text`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.text" />
@@ -997,7 +945,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create-form"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/create/form/step`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/create/form/step`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.form" />

@@ -1,4 +1,4 @@
-import { getColorPrimary, getCurrentViewInfo, getHeight, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo, getHeight } from '@/utils/global';
 import { PageContainer, ProDescriptions } from "@ant-design/pro-components";
 import { useParams, useIntl, FormattedMessage } from "@umijs/max";
 import { useEffect, useState } from "react";
@@ -25,7 +25,7 @@ const DetailView: React.FC = () => {
   const [drawerSize, setDrawerSize] = useState<number>(800);
   const [editorResource, setEditorResource] = useState<boolean>(false);
   const BaseApi = `api/v1/namespaces/${namespace}/configmaps`;
-  const BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/config/configmaps`
+  const BaseAddress = `/kubernetes/namespace/config/configmaps`
   const getInfo = async () => {
     let params = { cluster, address: `${BaseApi}/${name}` } as Record<string, any>;
     const res = await clusterGetProxy(params) as ConfigMap;
@@ -44,7 +44,7 @@ const DetailView: React.FC = () => {
     const params = { cluster, address: BaseApi };
     await clusterDeleteProxy(params);
     message.success(intl.formatMessage({ id: 'cluster.pages.operation.success' }));
-    window.location.pathname = normalizeKubernetesPath(BaseAddress);
+    window.location.href = appendKubernetesViewQuery(BaseAddress);
     return true;
   };
   const moreItems = () => {
@@ -53,7 +53,7 @@ const DetailView: React.FC = () => {
       nodes.push({
         key: 'edit',
         label: <a style={{ color: colorPrimary }} onClick={() => {
-          window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${info?.metadata?.namespace}/config/configmaps/${info?.metadata?.name}/update`)
+          window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/config/configmaps/${info?.metadata?.name}/update`, { cluster: cluster, namespace: info?.metadata?.namespace })
         }}><FormattedMessage id='cluster.resource.operation.edit' /></a>
       })
     }

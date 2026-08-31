@@ -1,4 +1,4 @@
-import { normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery } from '@/utils/global';
 import { ClusterNamespaceDetail } from "@/services/cluster_namespace";
 import { Card, Col, Row, Space, Typography } from "antd";
 import { useIntl } from "@umijs/max";
@@ -37,7 +37,7 @@ export const NamespaceDashboard: React.FC<NamespaceDashboardProps> = (props) => 
       width: '100%'
     }}>
       <a onClick={() => {
-        window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${props.cluster?.code}/namespace/${props.namespace}/dashboard/overview`);
+        window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/dashboard/overview`, { cluster: props.cluster?.code, namespace: props.namespace });
       }}> {props.namespace}</a>
     </div>
     {/* 描述区域：可点击跳转 */}

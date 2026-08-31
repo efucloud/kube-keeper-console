@@ -16,7 +16,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster } = getCurrentViewInfo();
   const [info, setInfo] = useState<IngressClass>();
   const BaseApi = `apis/networking.k8s.io/v1/ingressclasses`;
-  const BaseAddress = `/kubernetes/cluster/${cluster}/networks/ingressclass`;
+  const BaseAddress = `/kubernetes/cluster/networks/ingressclass`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create; // update or create
   const name = mode === Create ? '' : params.name || ''; // resource name

@@ -15,7 +15,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const resourceGroup = getClusterApiVersions(cluster, ['rbac.authorization.k8s.io/v1'], 'ClusterRoleBinding');
 const [info, setInfo] = useState<ClusterRoleBinding>();
   const baseApi = `apis/${resourceGroup.groupVersion}/clusterrolebindings`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/access/clusterrolebindings`;
+  const baseAddress = `/kubernetes/cluster/access/clusterrolebindings`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

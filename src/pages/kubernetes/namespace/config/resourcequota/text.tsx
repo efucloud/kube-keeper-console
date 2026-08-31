@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<IResourceQuota>();
   const baseApi = `api/v1/namespaces/${namespace || '-'}/resourcequotas`;
-  const baseAddress = namespace ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/config/resourcequotas` : `/kubernetes/cluster/${cluster}/config/resourcequotas`;
+  const baseAddress = namespace ? `/kubernetes/namespace/config/resourcequotas` : `/kubernetes/cluster/config/resourcequotas`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

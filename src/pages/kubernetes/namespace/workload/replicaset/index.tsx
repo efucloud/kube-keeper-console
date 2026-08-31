@@ -1,4 +1,4 @@
-import { CloseCircleOutlined, DeleteOutlined, EditOutlined, EyeInvisibleOutlined, EyeOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, DeleteOutlined, EditOutlined, InsertRowBelowOutlined, MoreOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { FooterToolbar, PageContainer, type ProFormInstance, ProTable } from '@ant-design/pro-components';
 import { Access, FormattedMessage, useAccess, useIntl } from '@umijs/max';
@@ -17,11 +17,10 @@ import PatchReplicas from '@/pages/kubernetes/components/patch_replicas';
 import ResourceEditor from '@/pages/kubernetes/components/resource_editor';
 import type { ClusterNamespaceDetail, ClusterNamespaceDetailList } from '@/services/cluster_namespace';
 import { clusterDeleteProxy, clusterGetProxy } from '@/services/cluster_proxy.api';
-import { useK8sWatchStream } from '@/hooks/useK8sWatchStream';
 
 import { canAccessClusterNamespaces } from '@/services/personal.api';
 import { getClusterResource } from '@/utils/cluster';
-import { getColorPrimary, getCurrentViewInfo, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getColorPrimary, getCurrentViewInfo } from '@/utils/global';
 import { syncClusterNamespace } from '@/services/cluster.api';
 import OwnerReferencesView from '@/pages/kubernetes/components/owner_references';
 
@@ -58,10 +57,9 @@ const IndexDashboard: React.FC = () => {
   const [dataSource, setDataSource] = useState<IReplicaSet[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const [watch, setWatch] = useState<boolean>(false);
-  let BaseAddress = `/kubernetes/cluster/${cluster}/namespace/${namespace}/workload/replicasets`;
+  let BaseAddress = `/kubernetes/namespace/workload/replicasets`;
   if (!namespace || namespace === '' || namespace === '-') {
-    BaseAddress = `/kubernetes/cluster/${cluster}/workload/replicasets`;
+    BaseAddress = `/kubernetes/cluster/workload/replicasets`;
   }
   const debouncedNamespaceChange = debounce((value) => { setSearchNamespace(value); }, 1000);
   const [selectedNamespace, setSelectedNamespace] = useState<string>(namespace);
@@ -237,38 +235,10 @@ const IndexDashboard: React.FC = () => {
     listReplicaSets();
 
   }, []);
-  const {
-    data: watchDataSource,
-    startWatch,
-    stopWatch,
-  } = useK8sWatchStream<any>({
-    cluster,
-    address: address,
-    labelSelector: searchLabels,
-    fieldSelector: {
-      ...(searchName ? { 'metadata.name': searchName } : {}),
-      ...searchFields,
-    },
-  });
-
-  useEffect(() => {
-    if (watch) {
-      setDataSource(watchDataSource as any);
-    }
-  }, [watch, watchDataSource]);
-
-  useEffect(() => {
-    if (watch) {
-      startWatch();
-    }
-  }, [watch, startWatch]);
 
 
-  useEffect(() => {
-    return () => {
-      stopWatch();
-    };
-  }, [stopWatch]);
+
+
 
   const columns: ProColumns<IReplicaSet>[] = [
     {
@@ -324,7 +294,7 @@ const IndexDashboard: React.FC = () => {
             <a
               onClick={() => {
                 window.open(
-                  normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/replicasets`),
+                  appendKubernetesViewQuery(`/kubernetes/namespace/workload/replicasets`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                 );
               }}
             >
@@ -350,10 +320,10 @@ const IndexDashboard: React.FC = () => {
               <a
                 onClick={() => {
                   if (namespace) {
-                    window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/replicasets/${entity?.metadata?.name}`);
+                    window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/replicasets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
                   } else {
                     window.open(
-                      normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/replicasets/${entity?.metadata?.name}`),
+                      appendKubernetesViewQuery(`/kubernetes/namespace/workload/replicasets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                       '_blank',
                     );
                   }
@@ -375,10 +345,10 @@ const IndexDashboard: React.FC = () => {
               <a
                 onClick={() => {
                   if (namespace) {
-                    window.location.pathname = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/replicasets/${entity?.metadata?.name}`);
+                    window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/replicasets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace });
                   } else {
                     window.open(
-                      normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${entity?.metadata?.namespace}/workload/replicasets/${entity?.metadata?.name}`),
+                      appendKubernetesViewQuery(`/kubernetes/namespace/workload/replicasets/${entity?.metadata?.name}`, { cluster: cluster, namespace: entity?.metadata?.namespace }),
                       '_blank',
                       'noreferrer',
                     );
@@ -770,7 +740,7 @@ const IndexDashboard: React.FC = () => {
           nodes.unshift(
             <a
               onClick={() => {
-                window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${record?.metadata?.namespace}/workload/replicasets/${record?.metadata?.name}/update`);
+                window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/workload/replicasets/${record?.metadata?.name}/update`, { cluster: cluster, namespace: record?.metadata?.namespace });
               }}
             >
               <EditOutlined style={{ color: colorPrimary }} />
@@ -867,29 +837,7 @@ const IndexDashboard: React.FC = () => {
         }}
         toolBarRender={() => [
           <Space separator={<Divider orientation="vertical" />}>
-            {watch && (
-              <span className='watch-status-blink' style={{ color: colorPrimary, fontSize: '12px' }}>
-                {intl.formatMessage({ id: 'cluster.resource.watch.status' })}
-              </span>
-            )}
 
-            {watch ? (
-              <EyeOutlined
-                style={{ color: colorPrimary, fontSize: '20px' }}
-                onClick={() => {
-                  stopWatch();
-                  setWatch(false);
-                }}
-              />
-            ) : (
-              <EyeInvisibleOutlined
-                style={{ fontSize: '20px' }}
-                onClick={() => {
-                  setWatch(true);
-                  startWatch();
-                }}
-              />
-            )}
 
 
             <a style={{ color: colorPrimary }} onClick={() => setExpandInfo(!expandInfo)}  >
@@ -904,7 +852,7 @@ const IndexDashboard: React.FC = () => {
                 type="primary"
                 key="create"
                 onClick={() => {
-                  window.location.href = normalizeKubernetesPath(`${BaseAddress}/create/text`);
+                  window.location.href = appendKubernetesViewQuery(`${BaseAddress}/create/text`);
                 }}
               >
                 <FormattedMessage id="cluster.resource.create.text" />

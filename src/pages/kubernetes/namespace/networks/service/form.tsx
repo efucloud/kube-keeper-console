@@ -4,7 +4,7 @@ import { ClusterNamespaceDetail, ClusterNamespaceDetailList } from "@/services/c
 import { clusterGetProxy, clusterPostProxy, clusterPutProxy } from "@/services/cluster_proxy.api";
 import { canAccessClusterNamespaces } from "@/services/personal.api";
 import { getClusterResource } from "@/utils/cluster";
-import { getCurrentViewInfo, getHeight, normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery, getCurrentViewInfo, getHeight } from '@/utils/global';
 import { ActionType, EditableProTable, ProColumns, ProDescriptions, ProForm, ProFormInstance, ProFormSelect, ProFormText } from "@ant-design/pro-components";
 import { FooterToolbar, PageContainer } from "@ant-design/pro-layout";
 import { Editor } from "@monaco-editor/react";
@@ -33,14 +33,14 @@ const ServiceForm: React.FC = () => {
     if (action === 'update') {
       let params = { cluster, address: `${BaseApi}/${name}` } as Record<string, any>;
       await clusterPutProxy(params, info) as IService;
-      window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${info.metadata?.namespace}/networks/services/${info.metadata?.name}/update`)
+      window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/networks/services/${info.metadata?.name}/update`, { cluster: cluster, namespace: info.metadata?.namespace })
     } else {
       if (!info?.metadata) { info.metadata = {} }
       info.metadata.name = values.metadata.name;
       info.metadata.namespace = values.metadata.namespace;
       let params = { cluster, address: `${BaseApi}` } as Record<string, any>;
       await clusterPostProxy(params, info) as IService;
-      window.location.href = normalizeKubernetesPath(`/kubernetes/cluster/${cluster}/namespace/${info.metadata?.namespace}/config/services/${info.metadata?.name}/update`)
+      window.location.href = appendKubernetesViewQuery(`/kubernetes/namespace/config/services/${info.metadata?.name}/update`, { cluster: cluster, namespace: info.metadata?.namespace })
     }
   };
   const columns: ProColumns<IIoK8sApiCoreV1ServicePort>[] = [

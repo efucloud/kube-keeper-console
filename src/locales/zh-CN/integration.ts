@@ -13,10 +13,5 @@ export default {
   "integration.git.scope.tenant": "租户",
   "integration.git.scope.tooltip": "命令在全局或当前租户下可见",
   "integration.git.extend.description":"暂时禁止添加多个",
-  "integration.debug.container": "调试容器",
-  "integration.debug.container.select": "选择调试容器",
-  "integration.debug.container.name": "名称",
-  "integration.debug.container.description": "描述",
-  "integration.debug.container.content": "容器内容",
   "integration.builtin.command": "快捷命令",
 };

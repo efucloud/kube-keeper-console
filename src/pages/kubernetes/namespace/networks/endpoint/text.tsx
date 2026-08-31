@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster, namespace } = getCurrentViewInfo();
   const [info, setInfo] = useState<IEndpoints>();
   const baseApi = `api/v1/namespaces/${namespace || '-'}/endpoints`;
-  const baseAddress = namespace ? `/kubernetes/cluster/${cluster}/namespace/${namespace}/networks/endpoints` : `/kubernetes/cluster/${cluster}/networks/endpoints`;
+  const baseAddress = namespace ? `/kubernetes/namespace/networks/endpoints` : `/kubernetes/cluster/networks/endpoints`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

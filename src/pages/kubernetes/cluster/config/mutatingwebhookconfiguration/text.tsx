@@ -14,7 +14,7 @@ const YamOrJsonForm: FC<Record<string, any>> = () => {
   const { cluster } = getCurrentViewInfo();
   const [info, setInfo] = useState<IMutatingWebhookConfiguration>();
   const baseApi = `apis/admissionregistration.k8s.io/v1/mutatingwebhookconfigurations`;
-  const baseAddress = `/kubernetes/cluster/${cluster}/config/mutatingwebhookconfigurations`;
+  const baseAddress = `/kubernetes/cluster/config/mutatingwebhookconfigurations`;
   const params = useParams();
   const mode = params.action === Update ? Update : Create;
   const name = mode === Create ? '' : params.name || '';

@@ -1,4 +1,4 @@
-import { normalizeKubernetesPath } from '@/utils/global';
+import { appendKubernetesViewQuery } from '@/utils/global';
 import { WorkspaceDetail } from "@/services/workspace";
 import { PageContainer } from "@ant-design/pro-components";
 import { Welcome } from "@ant-design/x";
@@ -29,7 +29,7 @@ export const Console: React.FC = () => {
           <Button
             type="primary"
             style={{ float: 'right' }}
-            onClick={() => { window.location.href = normalizeKubernetesPath(`/kubernetes/workspace/${code}`); }}
+            onClick={() => { window.location.href = appendKubernetesViewQuery(`/kubernetes/workspace/${code}`); }}
           >
             <FormattedMessage id="pages.operation.back" />
           </Button>
