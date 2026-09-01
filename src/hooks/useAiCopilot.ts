@@ -3,8 +3,8 @@ import type {
   ChatStopMeta,
   StreamEvent,
 } from "@/services/ai_copilot.d";
+import { buildAiChatWebSocketUrl } from "@/services/ai_chat.api";
 import { getI18nLanguage, getToken } from "@/utils/global";
-import { parseNDJSONStream } from "@/utils/ndjson-stream";
 import { getLocale, useIntl } from "@umijs/max";
 import { message } from "antd";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -757,18 +757,18 @@ export function useAiCopilot(options: UseAiCopilotOptions) {
   const [errors, setErrors] = useState<string[]>([]);
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
   const [runs, setRuns] = useState<Record<string, CopilotRunState>>({});
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const webSocketRef = useRef<WebSocket | null>(null);
+  const intentionallyClosedSocketsRef = useRef(new WeakSet<WebSocket>());
   const isMountedRef = useRef(true);
   const { cluster, namespace } = options;
   const orgToken = getToken();
 
   const sendMessage = useCallback(
-    async (request: ChatRequest) => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+    (request: ChatRequest) => {
+      if (webSocketRef.current) {
+        intentionallyClosedSocketsRef.current.add(webSocketRef.current);
+        webSocketRef.current.close(1000, "replaced by a new request");
       }
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
       setLoading(true);
       setErrors([]);
 
@@ -779,133 +779,142 @@ export function useAiCopilot(options: UseAiCopilotOptions) {
         [requestId]: createEmptyRun(requestId, question),
       }));
 
-      const timeoutId = window.setTimeout(() => {
-        if (controller.signal.aborted) {
-          window.clearTimeout(timeoutId);
+      const socket = new WebSocket(
+        buildAiChatWebSocketUrl({
+          cluster,
+          namespace,
+          accessToken: orgToken?.access_token || "",
+          locale: resolveRequestLocale(),
+        })
+      );
+      webSocketRef.current = socket;
+      let finished = false;
+
+      const reportTransportError = (errorText: string) => {
+        if (
+          finished ||
+          !isMountedRef.current ||
+          webSocketRef.current !== socket
+        ) {
           return;
         }
-        controller.abort();
+        finished = true;
         setLoading(false);
-        setErrors((prev) => [...prev, "Request timeout"]);
+        setErrors((prev) => [...prev, errorText]);
+        message.error(
+          `${intl.formatMessage({ id: "copilot.stream.error" })}: ${errorText}`
+        );
+      };
+
+      const timeoutId = window.setTimeout(() => {
+        if (finished || webSocketRef.current !== socket) {
+          return;
+        }
+        reportTransportError("Request timeout");
+        socket.close(4000, "request timeout");
       }, 180000);
 
-      try {
-        const locale = resolveRequestLocale();
-        const baseUrl = namespace
-          ? `/api/stream/cluster/${cluster}/namespace/${namespace}`
-          : `/api/stream/cluster/${cluster}`;
-        const response = await fetch(baseUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${orgToken?.access_token || ""}`,
-            "X-Locale": locale,
-          },
-          body: JSON.stringify(request),
-          signal: controller.signal,
-        });
+      socket.onopen = () => {
+        if (webSocketRef.current !== socket) {
+          return;
+        }
+        socket.send(JSON.stringify(request));
+      };
 
-        if (!response.ok) {
-          const errorText = await response.text().catch(() => "Unknown error");
-          throw new Error(`HTTP ${response.status}: ${errorText}`);
+      socket.onmessage = (messageEvent) => {
+        if (
+          finished ||
+          !isMountedRef.current ||
+          webSocketRef.current !== socket
+        ) {
+          return;
         }
 
-        await parseNDJSONStream(
-          response,
-          (rawEvent: StreamEvent) => {
-            if (!isMountedRef.current || controller.signal.aborted) {
-              return;
-            }
-            const eventRequestId = rawEvent.requestId || requestId;
-            let nextRun: CopilotRunState | undefined;
-            setRuns((prev) => {
-              const current =
-                prev[eventRequestId] ||
-                createEmptyRun(eventRequestId, question);
-              const next = applyEventToRun(current, rawEvent);
-              nextRun = next;
-              return {
-                ...prev,
-                [eventRequestId]: next,
-              };
-            });
+        let rawEvent: StreamEvent;
+        try {
+          rawEvent = JSON.parse(String(messageEvent.data)) as StreamEvent;
+        } catch (error) {
+          console.error("Invalid AI Copilot WebSocket event:", error);
+          reportTransportError("Invalid response from server");
+          socket.close(4002, "invalid server response");
+          return;
+        }
 
-            if (!nextRun) {
-              return;
-            }
-            if (nextRun.sessionId && nextRun.sessionId !== sessionId) {
-              setSessionId(nextRun.sessionId);
-            }
-            if (
-              rawEvent.type === "run_complete" &&
-              asString(getEventPayload(rawEvent).status) === "error"
-            ) {
-              const errorText =
-                asString(getPayloadData(getEventPayload(rawEvent)).error) ||
-                nextRun.error ||
-                "Unknown error";
-              setErrors((old) => [...old, errorText]);
-            }
-            if (rawEvent.type === "run_complete") {
-              setLoading(false);
-              window.clearTimeout(timeoutId);
-            }
-          },
-          (err) => {
-            if (!isMountedRef.current || controller.signal.aborted) {
-              return;
-            }
-            console.error("AI Copilot stream error:", err);
-            setErrors((prev) => [...prev, err.message]);
-            message.error(
-              `${intl.formatMessage({ id: "copilot.stream.error" })}: ${
-                err.message
-              }`
-            );
-            setLoading(false);
-          }
-        );
+        const eventRequestId = rawEvent.requestId || requestId;
+        let nextRun: CopilotRunState | undefined;
+        setRuns((prev) => {
+          const current =
+            prev[eventRequestId] || createEmptyRun(eventRequestId, question);
+          const next = applyEventToRun(current, rawEvent);
+          nextRun = next;
+          return {
+            ...prev,
+            [eventRequestId]: next,
+          };
+        });
 
-        if (isMountedRef.current && !controller.signal.aborted) {
+        if (nextRun?.sessionId) {
+          setSessionId((current) =>
+            current === nextRun?.sessionId ? current : nextRun?.sessionId
+          );
+        }
+        if (
+          rawEvent.type === "run_complete" &&
+          asString(getEventPayload(rawEvent).status) === "error"
+        ) {
+          const errorText =
+            asString(getPayloadData(getEventPayload(rawEvent)).error) ||
+            nextRun?.error ||
+            "Unknown error";
+          setErrors((old) => [...old, errorText]);
+        }
+        if (rawEvent.type === "run_complete") {
+          finished = true;
           setLoading(false);
           window.clearTimeout(timeoutId);
         }
-      } catch (err: any) {
-        if (controller.signal.aborted) {
-          window.clearTimeout(timeoutId);
-          return;
-        }
-        console.error("Failed to send AI request:", err);
-        setErrors((prev) => [...prev, err.message]);
-        message.error(
-          `${intl.formatMessage({ id: "copilot.send.failed" })}: ${err.message}`
-        );
-        setLoading(false);
+      };
+
+      socket.onerror = (error) => {
+        console.error("AI Copilot WebSocket error:", error);
+      };
+
+      socket.onclose = (closeEvent) => {
         window.clearTimeout(timeoutId);
-      }
+        if (
+          !intentionallyClosedSocketsRef.current.has(socket) &&
+          !finished
+        ) {
+          reportTransportError(
+            closeEvent.reason ||
+              "WebSocket connection closed before completion"
+          );
+        }
+        if (webSocketRef.current === socket) {
+          webSocketRef.current = null;
+        }
+      };
     },
-    [
-      cluster,
-      intl,
-      namespace,
-      orgToken?.access_token,
-      sessionId,
-    ]
+    [cluster, intl, namespace, orgToken?.access_token]
   );
 
   const cancelRequest = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
+    if (webSocketRef.current) {
+      intentionallyClosedSocketsRef.current.add(webSocketRef.current);
+      webSocketRef.current.close(1000, "request cancelled");
+      webSocketRef.current = null;
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+      if (webSocketRef.current) {
+        intentionallyClosedSocketsRef.current.add(webSocketRef.current);
+        webSocketRef.current.close(1000, "component unmounted");
+        webSocketRef.current = null;
       }
     };
   }, []);

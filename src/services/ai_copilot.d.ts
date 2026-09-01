@@ -65,7 +65,7 @@ export type ResourceContext = {
   name?: string;
   apiVersion?: string;
 } ; 
-// StreamEvent 定义向前端发送的 NDJSON envelope 结构。
+// StreamEvent 定义向前端发送的 WebSocket JSON envelope 结构。
 export type StreamEvent = { 
   requestId?: string;
   sessionId?: string;
