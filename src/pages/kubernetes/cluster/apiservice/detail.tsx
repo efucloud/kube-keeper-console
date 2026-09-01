@@ -21,8 +21,7 @@ const DetailView: React.FC = () => {
   const BaseApi = `apis/apiregistration.k8s.io/v1/apiservices`
   const BaseAddress = `/kubernetes/cluster/apiservices`
   const getInfo = async () => {
-    let params = { cluster, address: `${BaseApi}/${name}` } as Record<string, any>;
-    const res = await clusterGetProxy(params) as APIService;
+    const res = await clusterGetProxy({ cluster, address: `${BaseApi}/${name}` }) as APIService;
     setInfo(res);
   }
 

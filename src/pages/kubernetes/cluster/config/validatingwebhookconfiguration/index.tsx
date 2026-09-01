@@ -191,7 +191,7 @@ const IndexDashboard: React.FC = () => {
                 (key: string) => (
                   <>
                     <Tag style={{ border: 0 }} key={key}>
-                      {key}={entity?.metadata?.labels[key]}
+                      {key}={entity?.metadata?.labels?.[key] ?? ''}
                     </Tag>
                   </>
                 ),
@@ -207,7 +207,7 @@ const IndexDashboard: React.FC = () => {
                   {keys?.map((key: string) => (
                     <>
                       <Tag style={{ border: 0 }} key={key}>
-                        {key}={entity?.metadata?.labels[key]}
+                        {key}={entity?.metadata?.labels?.[key] ?? ''}
                       </Tag>
                       <br />
                     </>

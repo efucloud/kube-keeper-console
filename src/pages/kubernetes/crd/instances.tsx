@@ -244,7 +244,7 @@ const InstanceDashboard: React.FC = () => {
                 (key: string) => (
                   <>
                     <Tag style={{ border: 0 }} key={key}>
-                      {key}={entity?.metadata?.labels[key]}
+                      {key}={entity?.metadata?.labels?.[key] ?? ''}
                     </Tag>
                   </>
                 ),
@@ -260,7 +260,7 @@ const InstanceDashboard: React.FC = () => {
                   {keys?.map((key: string) => (
                     <>
                       <Tag style={{ border: 0 }} key={key}>
-                        {key}={entity?.metadata?.labels[key]}
+                        {key}={entity?.metadata?.labels?.[key] ?? ''}
                       </Tag>
                       <br />
                     </>

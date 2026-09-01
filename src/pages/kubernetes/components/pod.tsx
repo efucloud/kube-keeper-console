@@ -232,7 +232,7 @@ export const RenderPods: React.FC<RenderPodsProps> = (props) => {
                 (key: string) => (
                   <>
                     <Tag style={{ border: 0 }} key={key}>
-                      {key}={entity?.metadata?.labels[key]}
+                      {key}={entity?.metadata?.labels?.[key] ?? ''}
                     </Tag>
                   </>
                 ),
@@ -248,7 +248,7 @@ export const RenderPods: React.FC<RenderPodsProps> = (props) => {
                   {keys?.map((key: string) => (
                     <>
                       <Tag style={{ border: 0 }} key={key}>
-                        {key}={entity?.metadata?.labels[key]}
+                        {key}={entity?.metadata?.labels?.[key] ?? ''}
                       </Tag>
                       <br />
                     </>
