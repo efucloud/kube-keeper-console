@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_BIN="${DOCKER_BIN:-docker}"
 DOCKERFILE="${DOCKERFILE:-${ROOT_DIR}/Dockerfile.local}"
+NGINX_CONF="${ROOT_DIR}/nginx/default.conf"
 IMAGE_REPO="${IMAGE_REPO:-registry.cn-shenzhen.aliyuncs.com/efucloud-public/kube-keeper-console}"
 PUSH_LATEST="${PUSH_LATEST:-true}"
 PLATFORM="${PLATFORM:-linux/amd64}"
@@ -37,6 +38,16 @@ if [[ ! -f "${DOCKERFILE}" ]]; then
   exit 1
 fi
 
+if [[ ! -f "${NGINX_CONF}" ]]; then
+  echo "nginx config not found: ${NGINX_CONF}"
+  exit 1
+fi
+
+if ! grep -Fq 'COPY nginx/default.conf /etc/nginx/conf.d/default.conf' "${DOCKERFILE}"; then
+  echo "dockerfile does not copy nginx/default.conf: ${DOCKERFILE}"
+  exit 1
+fi
+
 if command -v git >/dev/null 2>&1 && git -C "${ROOT_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   GIT_COMMIT="$(git -C "${ROOT_DIR}" rev-parse HEAD 2>/dev/null || printf unknown)"
 else
@@ -48,6 +59,7 @@ IMAGE="${IMAGE_REPO}:${IMAGE_TAG}"
 
 echo "Root dir: ${ROOT_DIR}"
 echo "Dockerfile: ${DOCKERFILE}"
+echo "Nginx config: ${NGINX_CONF}"
 echo "Image repo: ${IMAGE_REPO}"
 echo "Image tag: ${IMAGE_TAG}"
 echo "Git commit: ${GIT_COMMIT}"
