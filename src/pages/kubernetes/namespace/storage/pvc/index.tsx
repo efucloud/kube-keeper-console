@@ -677,7 +677,7 @@ const IndexDashboard: React.FC = () => {
                 key="create"
                 onClick={() => {
                   window.location.href = appendKubernetesViewQuery(namespace
-                    ? appendKubernetesViewQuery(`/kubernetes/namespace/storage/pvc/create/text`, { cluster: cluster, namespace: namespace })
+                    ? appendKubernetesViewQuery(`/kubernetes/namespace/storage/persistentvolumeclaim/create/text`, { cluster: cluster, namespace: namespace })
                     : appendKubernetesViewQuery(`/kubernetes/cluster/storage/persistentvolumeclaim/create/text`, { cluster: cluster }));
                 }}
               >

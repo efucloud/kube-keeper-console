@@ -536,14 +536,14 @@ export default [
       {
         name: "persistentVolumeClaim",
         path: "/kubernetes/cluster/storage/persistentvolumeclaim",
-        component: "./kubernetes/namespace/storage/pvc",
+        component: "./kubernetes/namespace/storage/persistentvolumeclaim",
         access: "clusterAccess",
       },
       {
         name: "persistentVolumeClaim",
         hideInMenu: true,
         path: "/kubernetes/cluster/storage/persistentvolumeclaim/:name/:action",
-        component: "./kubernetes/namespace/storage/pvc/text",
+        component: "./kubernetes/namespace/storage/persistentvolumeclaim/text",
         access: "clusterAccess",
       },
     ],

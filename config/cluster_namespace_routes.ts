@@ -436,14 +436,14 @@ export default [
     routes: [
       {
         name: "persistentVolumeClaim",
-        path: "/kubernetes/namespace/storage/pvc",
-        component: "./kubernetes/namespace/storage/pvc",
+        path: "/kubernetes/namespace/storage/persistentvolumeclaim",
+        component: "./kubernetes/namespace/storage/persistentvolumeclaim",
       },
       {
         name: "persistentVolumeClaim",
         hideInMenu: true,
-        path: "/kubernetes/namespace/storage/pvc/:name/:action",
-        component: "./kubernetes/namespace/storage/pvc/text",
+        path: "/kubernetes/namespace/storage/persistentvolumeclaim/:name/:action",
+        component: "./kubernetes/namespace/storage/persistentvolumeclaim/text",
         access: "clusterNamespaceAccess",
       },
     ],
@@ -742,14 +742,14 @@ export default [
     routes: [
       {
         name: "persistentVolumeClaim",
-        path: "/kubernetes/namespace/storage/pvc",
-        component: "./kubernetes/namespace/storage/pvc",
+        path: "/kubernetes/namespace/storage/persistentvolumeclaim",
+        component: "./kubernetes/namespace/storage/persistentvolumeclaim",
       },
       {
         name: "persistentVolumeClaim",
         hideInMenu: true,
-        path: "/kubernetes/namespace/storage/pvc/:name/:action",
-        component: "./kubernetes/namespace/storage/pvc/text",
+        path: "/kubernetes/namespace/storage/persistentvolumeclaim/:name/:action",
+        component: "./kubernetes/namespace/storage/persistentvolumeclaim/text",
       },
     ],
   },
