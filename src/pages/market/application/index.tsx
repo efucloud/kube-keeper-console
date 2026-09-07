@@ -1,203 +1,259 @@
 import {
   AppstoreOutlined,
-  ArrowRightOutlined,
   ExportOutlined,
   RocketOutlined,
-  SearchOutlined,
 } from '@ant-design/icons';
-import { PageContainer } from '@ant-design/pro-components';
+import { PageContainer, ProDescriptions } from '@ant-design/pro-components';
 import { history, useIntl } from '@umijs/max';
 import {
   Avatar,
   Button,
   Card,
-  Col,
+  Divider,
   Empty,
+  Flex,
   Input,
+  List,
   Pagination,
-  Row,
-  Select,
   Skeleton,
-  Space,
   Tag,
   Typography,
+  theme,
 } from 'antd';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import { StandardFormRow, TagSelect } from '@/components';
+import type { DictionaryLine } from '@/services/data_dictionary';
+import { getDataDictionary } from '@/services/data_dictionary.api';
+import {
+  MARKET_APPLICATION_CATEGORY_DICTIONARY,
+  MARKET_APPLICATION_TAG_DICTIONARY,
+} from '@/services/data_dictionary.constants';
 import type { MarketApplicationDetail } from '@/services/market_application';
 import { listMarketApplication } from '@/services/market_application.api';
 import DeployApplicationModal from './deploy';
 import styles from './index.less';
 
+const allCategories = '__all__';
+
 const MarketApplicationPage: React.FC = () => {
   const intl = useIntl();
+  const { token } = theme.useToken();
   const [items, setItems] = useState<MarketApplicationDetail[]>([]);
   const [total, setTotal] = useState(0);
   const [current, setCurrent] = useState(1);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string>();
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<DictionaryLine[]>([]);
+  const [tags, setTags] = useState<DictionaryLine[]>([]);
   const [loading, setLoading] = useState(true);
   const [deploying, setDeploying] = useState<MarketApplicationDetail>();
   const pageSize = 12;
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await listMarketApplication({
-        current,
-        pageSize,
-        search: search || undefined,
-        category,
-        state: 1,
-      });
-      setItems(data.data || []);
-      setTotal(data.total || 0);
-    } finally {
-      setLoading(false);
-    }
-  };
+
   useEffect(() => {
-    load();
+    setLoading(true);
+    listMarketApplication({
+      current,
+      pageSize,
+      search: search || undefined,
+      category,
+      state: 1,
+    })
+      .then((data) => {
+        setItems(data.data || []);
+        setTotal(data.total || 0);
+      })
+      .finally(() => setLoading(false));
   }, [category, current, search]);
 
   useEffect(() => {
-    listMarketApplication({ current: 1, pageSize: 200, state: 1 }).then(
-      (data) =>
-        setCategories(
-          Array.from(
-            new Set(
-              (data.data || []).map((item) => item.category).filter(Boolean),
-            ),
-          ).sort(),
-        ),
-    );
+    Promise.all([
+      getDataDictionary({ code: MARKET_APPLICATION_CATEGORY_DICTIONARY }),
+      getDataDictionary({ code: MARKET_APPLICATION_TAG_DICTIONARY }),
+    ]).then(([categoryDictionary, tagDictionary]) => {
+      setCategories(categoryDictionary.lines || []);
+      setTags(tagDictionary.lines || []);
+    });
   }, []);
 
+  const categoryLabel = (value: string) =>
+    categories.find((item) => item.value === value)?.label || value;
+  const tagLabel = (value: string) =>
+    tags.find((item) => item.value === value)?.label || value;
+
+  const openDetail = (id: string) =>
+    history.push(`/market/application/detail/${id}`);
+
   return (
-    <PageContainer title={false} breadcrumb={undefined}>
-      <section className={styles.hero}>
-        <Typography.Text className={styles.eyebrow}>
-          {intl.formatMessage({ id: 'application.market.eyebrow' })}
-        </Typography.Text>
-        <Typography.Title className={styles.title}>
-          {intl.formatMessage({ id: 'application.market' })}
-        </Typography.Title>
-        <Typography.Paragraph
-          style={{ color: 'rgba(255,255,255,.76)', maxWidth: 620, margin: 0 }}
-        >
-          {intl.formatMessage({ id: 'application.market.description' })}
-        </Typography.Paragraph>
-        <div className={styles.searchBar}>
-          <Select
-            className={styles.category}
-            size="large"
-            allowClear
-            value={category}
-            placeholder={intl.formatMessage({ id: 'application.category.all' })}
-            options={categories.map((value) => ({ label: value, value }))}
-            onChange={(value) => {
-              setCategory(value);
-              setCurrent(1);
-            }}
-          />
+    <PageContainer
+      className={styles.marketPage}
+      header={{ breadcrumb: {} }}
+      title={intl.formatMessage({ id: 'application.market' })}
+      subTitle={intl.formatMessage({ id: 'application.market.description' })}
+      content={
+        <div className={styles.searchArea}>
           <Input.Search
-            className={styles.search}
             size="large"
             allowClear
-            prefix={<SearchOutlined />}
-            placeholder={intl.formatMessage({ id: 'application.search' })}
             enterButton
+            placeholder={intl.formatMessage({ id: 'application.search' })}
             onSearch={(value) => {
-              setSearch(value);
+              setSearch(value.trim());
               setCurrent(1);
             }}
           />
         </div>
-      </section>
+      }
+    >
+      <Card variant="borderless" className={styles.filterCard}>
+        <StandardFormRow
+          title={intl.formatMessage({ id: 'application.category' })}
+          block
+          last
+        >
+          <TagSelect
+            hideCheckAll
+            expandable
+            value={[category || allCategories]}
+            onChange={(values) => {
+              const selected = String(values.at(-1) || allCategories);
+              setCategory(selected === allCategories ? undefined : selected);
+              setCurrent(1);
+            }}
+          >
+            {[
+              {
+                label: intl.formatMessage({ id: 'application.category.all' }),
+                value: allCategories,
+                index: 0,
+              },
+              ...categories,
+            ].map((item) => (
+              <TagSelect.Option value={item.value} key={item.value}>
+                {item.label}
+              </TagSelect.Option>
+            ))}
+          </TagSelect>
+        </StandardFormRow>
+      </Card>
+
       {loading ? (
-        <Skeleton active paragraph={{ rows: 8 }} />
+        <Card variant="borderless">
+          <Skeleton active avatar paragraph={{ rows: 6 }} />
+        </Card>
       ) : items.length === 0 ? (
-        <Empty />
+        <Card variant="borderless">
+          <Empty />
+        </Card>
       ) : (
-        <Row gutter={[18, 18]}>
-          {items.map((item) => (
-            <Col key={item.id} xs={24} sm={12} lg={8} xl={6}>
+        <List<MarketApplicationDetail>
+          rowKey="id"
+          grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 3, xl: 4, xxl: 4 }}
+          dataSource={items}
+          renderItem={(item) => (
+            <List.Item>
               <Card
-                className={styles.card}
-                styles={{
-                  body: {
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  },
-                }}
+                hoverable
+                className={styles.applicationCard}
+                onClick={() => openDetail(item.id)}
               >
-                <Space align="start" size={14}>
-                  {item.logo ? (
-                    <Avatar shape="square" size={54} src={item.logo} />
-                  ) : (
-                    <div className={styles.logo}>
-                      <AppstoreOutlined />
-                    </div>
-                  )}
-                  <div>
-                    <Typography.Title level={4} style={{ margin: '2px 0 4px' }}>
-                      {item.name}
+                <Card.Meta
+                  avatar={
+                    item.logo ? (
+                      <Avatar shape="square" size={34} src={item.logo} />
+                    ) : (
+                      <Avatar
+                        shape="square"
+                        size={34}
+                        icon={<AppstoreOutlined />}
+                      />
+                    )
+                  }
+                  title={
+                    <div className={styles.cardTitle}>
+                      <Typography.Text strong ellipsis>
+                        {item.name}
+                      </Typography.Text>
                       {item.home && (
                         <Button
-                          type="link"
+                          type="text"
                           size="small"
                           icon={<ExportOutlined />}
                           href={item.home}
                           target="_blank"
+                          aria-label={intl.formatMessage({
+                            id: 'application.home',
+                          })}
                           onClick={(event) => event.stopPropagation()}
                         />
                       )}
-                    </Typography.Title>
-                    <Typography.Text type="secondary">
-                      {item.category}
-                    </Typography.Text>
-                  </div>
-                </Space>
+                    </div>
+                  }
+                />
+
+                <ProDescriptions
+                  className={styles.meta}
+                  column={2}
+                  size="small"
+                >
+                  <ProDescriptions.Item
+                    label={intl.formatMessage({ id: 'application.category' })}
+                  >
+                    {categoryLabel(item.category)}
+                  </ProDescriptions.Item>
+                  <ProDescriptions.Item
+                    label={intl.formatMessage({ id: 'application.resources' })}
+                  >
+                    {item.templates?.length || 0}
+                  </ProDescriptions.Item>
+                </ProDescriptions>
+
                 <Typography.Paragraph
-                  ellipsis={{ rows: 3 }}
-                  style={{ minHeight: 66, margin: '18px 0' }}
+                  type="secondary"
+                  ellipsis={{ rows: 2 }}
+                  className={styles.description}
                 >
                   {item.description ||
                     intl.formatMessage({ id: 'application.no.description' })}
                 </Typography.Paragraph>
-                <Space size={[4, 4]} wrap style={{ minHeight: 30 }}>
+
+                <Flex gap={4} wrap className={styles.tags}>
                   {(item.tags || []).map((tag) => (
-                    <Tag key={tag} color="blue">
-                      {tag}
+                    <Tag key={tag} color={token.colorPrimary}>
+                      {tagLabel(tag)}
                     </Tag>
                   ))}
-                </Space>
-                <Space style={{ marginTop: 'auto', paddingTop: 18 }}>
+                </Flex>
+
+                <Divider className={styles.cardDivider} />
+                <div className={styles.cardFooter}>
+                  <Typography.Text type="secondary" className={styles.date}>
+                    {item.createdAt
+                      ? dayjs(item.createdAt).format('YYYY.MM.DD')
+                      : ''}
+                  </Typography.Text>
                   <Button
-                    type="primary"
+                    type="text"
+                    size="small"
                     icon={<RocketOutlined />}
-                    onClick={() => setDeploying(item)}
+                    style={{ color: token.colorPrimary }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setDeploying(item);
+                    }}
                   >
                     {intl.formatMessage({ id: 'application.deploy' })}
                   </Button>
-                  <Button
-                    type="text"
-                    icon={<ArrowRightOutlined />}
-                    onClick={() =>
-                      history.push(`/market/application/${item.id}`)
-                    }
-                  >
-                    {intl.formatMessage({ id: 'application.details' })}
-                  </Button>
-                </Space>
+                </div>
               </Card>
-            </Col>
-          ))}
-        </Row>
+            </List.Item>
+          )}
+        />
       )}
+
       {total > pageSize && (
         <Pagination
-          style={{ marginTop: 28, textAlign: 'right' }}
+          className={styles.pagination}
           current={current}
           pageSize={pageSize}
           total={total}
@@ -205,6 +261,7 @@ const MarketApplicationPage: React.FC = () => {
           onChange={setCurrent}
         />
       )}
+
       <DeployApplicationModal
         application={deploying}
         open={Boolean(deploying)}
@@ -213,4 +270,5 @@ const MarketApplicationPage: React.FC = () => {
     </PageContainer>
   );
 };
+
 export default MarketApplicationPage;

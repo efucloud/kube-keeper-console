@@ -240,7 +240,7 @@ export const ClusterConnect: React.FC<clusterConnectInfo> = ({ clusterCode, redi
       {connectedAble ? (
         <a
           onClick={() => {
-            window.location.href = appendKubernetesViewQuery(targetPath);
+            window.location.href = targetPath;
           }}
         >
           <ExportOutlined />

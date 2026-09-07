@@ -1,5 +1,6 @@
 import { AvatarDropdown, AvatarName, Footer, SelectLang, About, SwapView, ClusterImport, WorkplaceIndex, ClusterTerminal } from '@/components';
 import type { Settings as LayoutSettings, AppItemProps, AppListProps, MenuDataItem } from '@ant-design/pro-components';
+import { AppstoreOutlined } from '@ant-design/icons';
 import '@ant-design/v5-patch-for-react-19';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { FormattedMessage } from '@umijs/max';
@@ -76,6 +77,18 @@ export async function getInitialState(): Promise<{
 
   const fetchAppList = async () => {
     let app = [] as AppItemProps[];
+    const { cluster } = getCurrentViewInfo();
+    if (cluster) {
+      app.push({
+        title: getI18nLanguage() === 'en-US' ? 'Application Market' : '应用市场',
+        desc: getI18nLanguage() === 'en-US'
+          ? 'Discover and deploy applications to Kubernetes'
+          : '发现并部署 Kubernetes 应用',
+        icon: <AppstoreOutlined style={{ fontSize: '30px' }} />,
+        url: '/market/application',
+        target: '_blank',
+      } as AppItemProps);
+    }
     return app as AppListProps;
   };
   const { location } = history;

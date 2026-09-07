@@ -348,12 +348,6 @@ const DeployApplicationModal: React.FC<Props> = ({
           </Space>
         }
       >
-        <Alert
-          type="info"
-          showIcon
-          message={intl.formatMessage({ id: 'application.base.only' })}
-          style={{ marginBottom: 20 }}
-        />
         <Form form={form} layout="vertical" preserve={false}>
           <Space.Compact block>
             <Form.Item

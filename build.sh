@@ -12,14 +12,7 @@ PLATFORM="${PLATFORM:-linux/amd64}"
 DOCKER_BUILD_FLAGS="${DOCKER_BUILD_FLAGS:-}"
 SKIP_FRONTEND_BUILD="${SKIP_FRONTEND_BUILD:-false}"
 
-DEFAULT_IMAGE_TAG="v1.0.0"
-
-if command -v git >/dev/null 2>&1 && git -C "${ROOT_DIR}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  LATEST_TAG="$(git -C "${ROOT_DIR}" tag --sort=-version:refname | head -n 1 || true)"
-  if [[ "${LATEST_TAG}" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-    DEFAULT_IMAGE_TAG="v${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.$((BASH_REMATCH[3] + 1))"
-  fi
-fi
+DEFAULT_IMAGE_TAG="v1.0.0.$(date +'%Y%m%d%H%M')"
 
 IMAGE_TAG="${IMAGE_TAG:-${DEFAULT_IMAGE_TAG}}"
 

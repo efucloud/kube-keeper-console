@@ -3,9 +3,8 @@ export default {
   'application.json.invalid': '请输入有效的 JSON',
   'application.number.invalid': '请输入有效的数字',
   'application.market': '应用市场',
-  'application.market.eyebrow': 'Kubernetes 应用目录',
   'application.market.description':
-    '选择经过整理的 Base 应用模板，填写参数后直接部署到你有权限的命名空间。',
+    '浏览应用，完成配置与校验后部署到你有权限的命名空间。',
   'application.search': '搜索应用名称或描述',
   'application.no.description': '暂无应用说明',
   'application.deploy': '部署应用',
@@ -35,8 +34,6 @@ export default {
     '渲染存在错误：{success} 个资源成功，{failed} 个资源失败。',
   'application.resource.passed': '通过',
   'application.resource.failed': '失败',
-  'application.base.only':
-    '社区版应用市场仅支持 Base YAML 模板，不包含乐高应用和版本管理。',
   'application.cluster': '目标集群',
   'application.namespace': '命名空间',
   'application.releaseName': '部署名称',
@@ -65,11 +62,11 @@ export default {
   'application.description': '应用说明',
   'application.save': '保存',
   'application.basic': '基本信息',
-  'application.template': 'Base 模板',
+  'application.template': '应用模板',
   'application.template.help':
     '支持多文档 YAML；参数使用 _{{_ .参数名 _}}_，系统会自动注入 name 和 namespace。',
   'application.parameters.help':
-    '使用 ParameterDefinition JSON 数组定义部署表单，支持 string、text、password、number、bool、image 等类型。',
+    '定义部署应用时需要填写的配置项，可设置显示名称、输入类型、默认值和可选范围。',
   'application.parameters.invalid': '参数定义 JSON 无效',
   'application.parameter': '参数',
   'application.parameter.add': '添加参数',

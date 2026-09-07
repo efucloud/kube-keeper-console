@@ -7,6 +7,13 @@ export default [
     access: "adminAccess",
   },
   {
+    name: "settings.dict",
+    icon: "unorderedList",
+    path: "/admin/settings/dict",
+    component: "./admin/settings/dict",
+    access: "adminAccess",
+  },
+  {
     name: "appManagement",
     path: "/admin/application/create",
     hideInMenu: true,

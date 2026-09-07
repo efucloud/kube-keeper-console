@@ -3,9 +3,8 @@ export default {
   'application.json.invalid': 'Enter valid JSON',
   'application.number.invalid': 'Enter a valid number',
   'application.market': 'Application Market',
-  'application.market.eyebrow': 'Kubernetes application catalog',
   'application.market.description':
-    'Choose a curated Base template, configure its parameters, and deploy it directly to an accessible namespace.',
+    'Browse applications, configure and validate them, then deploy to an accessible namespace.',
   'application.search': 'Search applications',
   'application.no.description': 'No description',
   'application.deploy': 'Deploy',
@@ -36,8 +35,6 @@ export default {
     'Render completed with errors: {success} resources succeeded and {failed} failed.',
   'application.resource.passed': 'Passed',
   'application.resource.failed': 'Failed',
-  'application.base.only':
-    'The community market supports Base YAML templates only, without Lego applications or version management.',
   'application.cluster': 'Target cluster',
   'application.namespace': 'Namespace',
   'application.releaseName': 'Release name',
@@ -66,11 +63,11 @@ export default {
   'application.description': 'Description',
   'application.save': 'Save',
   'application.basic': 'Basic information',
-  'application.template': 'Base template',
+  'application.template': 'Application template',
   'application.template.help':
     'Multi-document YAML is supported. Use _{{_ .parameter _}}_; name and namespace are injected automatically.',
   'application.parameters.help':
-    'Provide a ParameterDefinition JSON array. string, text, password, number, bool, and image are supported.',
+    'Define the configuration requested during deployment, including labels, input types, defaults, and allowed values.',
   'application.parameters.invalid': 'Invalid parameter JSON',
   'application.parameter': 'Parameter',
   'application.parameter.add': 'Add parameter',

@@ -27,14 +27,16 @@ export default [
   },
   {
     name: "applicationMarket",
-    icon: "appstore",
     path: "/market/application",
+    hideInMenu: true,
+    menuRender: false,
     component: "./market/application",
   },
   {
     name: "applicationMarket",
-    path: "/market/application/:id",
+    path: "/market/application/detail/:id",
     hideInMenu: true,
+    menuRender: false,
     component: "./market/application/detail",
   },
   {

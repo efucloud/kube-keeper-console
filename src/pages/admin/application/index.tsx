@@ -20,7 +20,13 @@ import {
 } from 'antd';
 import { saveAs } from 'file-saver';
 import * as yaml from 'js-yaml';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { DictionaryLine } from '@/services/data_dictionary';
+import { getDataDictionary } from '@/services/data_dictionary.api';
+import {
+  MARKET_APPLICATION_CATEGORY_DICTIONARY,
+  MARKET_APPLICATION_TAG_DICTIONARY,
+} from '@/services/data_dictionary.constants';
 import type { MarketApplicationDetail } from '@/services/market_application';
 import {
   deleteMarketApplication,
@@ -33,6 +39,19 @@ import {
 const ApplicationManagement: React.FC = () => {
   const intl = useIntl();
   const actionRef = useRef<ActionType>(null);
+  const [categories, setCategories] = useState<DictionaryLine[]>([]);
+  const [tags, setTags] = useState<DictionaryLine[]>([]);
+  useEffect(() => {
+    Promise.all([
+      getDataDictionary({ code: MARKET_APPLICATION_CATEGORY_DICTIONARY }),
+      getDataDictionary({ code: MARKET_APPLICATION_TAG_DICTIONARY }),
+    ]).then(([categoryDictionary, tagDictionary]) => {
+      setCategories(categoryDictionary.lines || []);
+      setTags(tagDictionary.lines || []);
+    });
+  }, []);
+  const dictionaryLabel = (lines: DictionaryLine[], value: string) =>
+    lines.find((line) => line.value === value)?.label || value;
   const exportApplication = async (record: MarketApplicationDetail) => {
     const data = await exportMarketApplication({ id: record.id });
     saveAs(
@@ -61,6 +80,11 @@ const ApplicationManagement: React.FC = () => {
       title: intl.formatMessage({ id: 'application.category' }),
       dataIndex: 'category',
       width: 140,
+      valueType: 'select',
+      valueEnum: Object.fromEntries(
+        categories.map((item) => [item.value, { text: item.label }]),
+      ),
+      render: (_, record) => dictionaryLabel(categories, record.category),
     },
     {
       title: intl.formatMessage({ id: 'application.tags' }),
@@ -69,7 +93,7 @@ const ApplicationManagement: React.FC = () => {
       render: (_, record) => (
         <Space size={[2, 2]} wrap>
           {record.tags?.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
+            <Tag key={tag}>{dictionaryLabel(tags, tag)}</Tag>
           ))}
         </Space>
       ),

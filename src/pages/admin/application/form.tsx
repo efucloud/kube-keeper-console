@@ -1,7 +1,7 @@
 import {
+  FooterToolbar,
   PageContainer,
   ProForm,
-  ProFormGroup,
   ProFormList,
   ProFormSelect,
   ProFormSwitch,
@@ -10,9 +10,15 @@ import {
 } from '@ant-design/pro-components';
 import Editor from '@monaco-editor/react';
 import { history, useIntl, useParams } from '@umijs/max';
-import { Alert, Card, Form, message, Tabs } from 'antd';
+import { Alert, Card, Col, Form, message, Row } from 'antd';
 import { useEffect, useState } from 'react';
 import type { ParameterDefinitions } from '@/services/application_def';
+import type { DictionaryLine } from '@/services/data_dictionary';
+import { getDataDictionary } from '@/services/data_dictionary.api';
+import {
+  MARKET_APPLICATION_CATEGORY_DICTIONARY,
+  MARKET_APPLICATION_TAG_DICTIONARY,
+} from '@/services/data_dictionary.constants';
 import type { MarketApplicationCreate } from '@/services/market_application';
 import {
   createMarketApplication,
@@ -72,6 +78,17 @@ const ApplicationForm: React.FC = () => {
   const editing = Boolean(params.id);
   const [form] = Form.useForm<FormValues>();
   const [loading, setLoading] = useState(editing);
+  const [categoryOptions, setCategoryOptions] = useState<DictionaryLine[]>([]);
+  const [tagOptions, setTagOptions] = useState<DictionaryLine[]>([]);
+  useEffect(() => {
+    Promise.all([
+      getDataDictionary({ code: MARKET_APPLICATION_CATEGORY_DICTIONARY }),
+      getDataDictionary({ code: MARKET_APPLICATION_TAG_DICTIONARY }),
+    ]).then(([categoryDictionary, tagDictionary]) => {
+      setCategoryOptions(categoryDictionary.lines || []);
+      setTagOptions(tagDictionary.lines || []);
+    });
+  }, []);
   useEffect(() => {
     if (!params.id) return;
     getMarketApplication({ id: params.id })
@@ -149,222 +166,237 @@ const ApplicationForm: React.FC = () => {
     return true;
   };
   return (
-    <PageContainer
-      title={
-        editing
-          ? intl.formatMessage({ id: 'application.edit' })
-          : intl.formatMessage({ id: 'application.create' })
-      }
-      onBack={() => history.back()}
-      loading={loading}
+    <ProForm<FormValues>
+      form={form}
+      layout="vertical"
+      onFinish={submit}
+      initialValues={{
+        category: 'application',
+        state: false,
+        yamlContent:
+          'apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: _{{_ .name _}}_\n  namespace: _{{_ .namespace _}}_\n',
+        parameters: [],
+      }}
+      submitter={{
+        searchConfig: {
+          submitText: intl.formatMessage({ id: 'application.save' }),
+        },
+        render: (_, dom) => <FooterToolbar>{dom}</FooterToolbar>,
+      }}
     >
-      <ProForm<FormValues>
-        form={form}
-        layout="vertical"
-        onFinish={submit}
-        initialValues={{
-          category: 'application',
-          state: false,
-          yamlContent:
-            'apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: _{{_ .name _}}_\n  namespace: _{{_ .namespace _}}_\n',
-          parameters: [],
-        }}
-        submitter={{
-          searchConfig: {
-            submitText: intl.formatMessage({ id: 'application.save' }),
-          },
-        }}
+      <PageContainer
+        title={
+          editing
+            ? intl.formatMessage({ id: 'application.edit' })
+            : intl.formatMessage({ id: 'application.create' })
+        }
+        header={{ breadcrumb: {}, onBack: () => history.back() }}
+        loading={loading}
       >
-        <Card>
-          <Tabs
-            items={[
-              {
-                key: 'basic',
-                label: intl.formatMessage({ id: 'application.basic' }),
-                children: (
-                  <>
-                    <ProFormText
-                      name="name"
-                      label={intl.formatMessage({ id: 'application.name' })}
-                      rules={[{ required: true }]}
-                    />
-                    <ProFormTextArea
-                      name="description"
-                      label={intl.formatMessage({
-                        id: 'application.description',
-                      })}
-                      fieldProps={{ rows: 6 }}
-                    />
-                    <ProFormText name="logo" label="Logo URL" />
-                    <ProFormText
-                      name="home"
-                      label={intl.formatMessage({ id: 'application.home' })}
-                      rules={[{ type: 'url' }]}
-                    />
-                    <ProFormText
-                      name="category"
-                      label={intl.formatMessage({ id: 'application.category' })}
-                      rules={[{ required: true }]}
-                    />
-                    <ProFormSelect
-                      name="tags"
-                      label={intl.formatMessage({ id: 'application.tags' })}
-                      fieldProps={{
-                        mode: 'tags',
-                        maxCount: 4,
-                        tokenSeparators: [','],
-                      }}
-                    />
-                    <ProFormSwitch
-                      name="state"
-                      label={intl.formatMessage({
-                        id: 'application.published',
-                      })}
-                    />
-                  </>
-                ),
-              },
-              {
-                key: 'template',
-                label: intl.formatMessage({ id: 'application.template' }),
-                children: (
-                  <>
-                    <Alert
-                      type="info"
-                      showIcon
-                      message={intl.formatMessage({
-                        id: 'application.template.help',
-                      })}
-                      style={{ marginBottom: 16 }}
-                    />
-                    <Form.Item name="yamlContent" rules={[{ required: true }]}>
-                      <Editor
-                        height="560px"
-                        language="yaml"
-                        theme="vs-dark"
-                        options={{
-                          minimap: { enabled: false },
-                          fontSize: 13,
-                          tabSize: 2,
-                        }}
-                        onChange={(value) =>
-                          form.setFieldValue('yamlContent', value || '')
-                        }
-                      />
-                    </Form.Item>
-                  </>
-                ),
-              },
-              {
-                key: 'parameters',
-                label: intl.formatMessage({ id: 'application.parameters' }),
-                children: (
-                  <>
-                    <Alert
-                      type="info"
-                      showIcon
-                      message={intl.formatMessage({
-                        id: 'application.parameters.help',
-                      })}
-                      style={{ marginBottom: 16 }}
-                    />
-                    <ProFormList
-                      name="parameters"
-                      creatorRecord={{
-                        type: 'string',
-                        required: false,
-                      }}
-                      creatorButtonProps={{
-                        creatorButtonText: intl.formatMessage({
-                          id: 'application.parameter.add',
-                        }),
-                      }}
-                      itemRender={({ listDom, action }, { index }) => (
-                        <Card
-                          size="small"
-                          title={`${intl.formatMessage({ id: 'application.parameter' })} ${index + 1}`}
-                          extra={action}
-                          style={{ marginBottom: 12 }}
-                        >
-                          {listDom}
-                        </Card>
-                      )}
-                    >
-                      <ProFormGroup>
-                        <ProFormText
-                          name="name"
-                          label={intl.formatMessage({
-                            id: 'application.parameter.name',
-                          })}
-                          rules={[
-                            { required: true },
-                            { pattern: /^[A-Za-z_][A-Za-z0-9_.-]*$/ },
-                          ]}
-                          width="sm"
-                        />
-                        <ProFormText
-                          name="displayName"
-                          label={intl.formatMessage({
-                            id: 'application.parameter.displayName',
-                          })}
-                          width="sm"
-                        />
-                        <ProFormSelect
-                          name="type"
-                          label={intl.formatMessage({
-                            id: 'application.parameter.type',
-                          })}
-                          options={parameterTypes}
-                          rules={[{ required: true }]}
-                          width="sm"
-                        />
-                        <ProFormSwitch
-                          name="required"
-                          label={intl.formatMessage({
-                            id: 'application.parameter.required',
-                          })}
-                        />
-                      </ProFormGroup>
-                      <ProFormTextArea
-                        name="description"
-                        label={intl.formatMessage({
-                          id: 'application.description',
-                        })}
-                        fieldProps={{ rows: 2 }}
-                      />
-                      <ProFormGroup>
-                        <ProFormTextArea
-                          name="defaultValueJson"
-                          label={intl.formatMessage({
-                            id: 'application.parameter.default',
-                          })}
-                          tooltip={intl.formatMessage({
-                            id: 'application.parameter.json.help',
-                          })}
-                          fieldProps={{ rows: 3 }}
-                          width="md"
-                        />
-                        <ProFormTextArea
-                          name="allowableValuesJson"
-                          label={intl.formatMessage({
-                            id: 'application.parameter.allowable',
-                          })}
-                          tooltip={intl.formatMessage({
-                            id: 'application.parameter.allowable.help',
-                          })}
-                          fieldProps={{ rows: 3 }}
-                          width="md"
-                        />
-                      </ProFormGroup>
-                    </ProFormList>
-                  </>
-                ),
-              },
-            ]}
-          />
+        <Card
+          title={intl.formatMessage({ id: 'application.basic' })}
+          variant="borderless"
+        >
+          <Row gutter={64}>
+            <Col xs={24} md={12} lg={8}>
+              <ProFormText
+                name="name"
+                label={intl.formatMessage({ id: 'application.name' })}
+                rules={[{ required: true }]}
+              />
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <ProFormSelect
+                name="category"
+                label={intl.formatMessage({ id: 'application.category' })}
+                rules={[{ required: true }]}
+                options={categoryOptions}
+                fieldProps={{
+                  optionFilterProp: 'label',
+                  showSearch: true,
+                }}
+              />
+            </Col>
+            <Col xs={24} md={12} lg={8}>
+              <ProFormSwitch
+                name="state"
+                label={intl.formatMessage({ id: 'application.published' })}
+              />
+            </Col>
+          </Row>
+          <Row gutter={64}>
+            <Col xs={24} lg={12}>
+              <ProFormText name="logo" label="Logo URL" />
+            </Col>
+            <Col xs={24} lg={12}>
+              <ProFormText
+                name="home"
+                label={intl.formatMessage({ id: 'application.home' })}
+                rules={[{ type: 'url' }]}
+              />
+            </Col>
+          </Row>
+          <Row gutter={64}>
+            <Col span={24}>
+              <ProFormSelect
+                name="tags"
+                label={intl.formatMessage({ id: 'application.tags' })}
+                options={tagOptions}
+                fieldProps={{
+                  mode: 'multiple',
+                  maxCount: 4,
+                  optionFilterProp: 'label',
+                  showSearch: true,
+                }}
+              />
+            </Col>
+          </Row>
+          <Row gutter={64}>
+            <Col span={24}>
+              <ProFormTextArea
+                name="description"
+                label={intl.formatMessage({ id: 'application.description' })}
+                fieldProps={{ rows: 5 }}
+              />
+            </Col>
+          </Row>
         </Card>
-      </ProForm>
-    </PageContainer>
+
+        <Card
+          title={intl.formatMessage({ id: 'application.template' })}
+          style={{ marginTop: 20 }}
+        >
+          <Alert
+            type="info"
+            showIcon
+            message={intl.formatMessage({ id: 'application.template.help' })}
+            style={{ marginBottom: 16 }}
+          />
+          <Form.Item name="yamlContent" rules={[{ required: true }]}>
+            <Editor
+              height="520px"
+              language="yaml"
+              theme="vs-dark"
+              options={{
+                minimap: { enabled: false },
+                fontSize: 13,
+                tabSize: 2,
+              }}
+              onChange={(value) =>
+                form.setFieldValue('yamlContent', value || '')
+              }
+            />
+          </Form.Item>
+        </Card>
+
+        <Card
+          title={intl.formatMessage({ id: 'application.parameters' })}
+          style={{ marginTop: 20 }}
+        >
+          <Alert
+            type="info"
+            showIcon
+            message={intl.formatMessage({ id: 'application.parameters.help' })}
+            style={{ marginBottom: 16 }}
+          />
+          <ProFormList
+            name="parameters"
+            creatorRecord={{ type: 'string', required: false }}
+            creatorButtonProps={{
+              creatorButtonText: intl.formatMessage({
+                id: 'application.parameter.add',
+              }),
+            }}
+            itemRender={({ listDom, action }, { index }) => (
+              <Card
+                size="small"
+                title={`${intl.formatMessage({ id: 'application.parameter' })} ${index + 1}`}
+                extra={action}
+                style={{ marginBottom: 16 }}
+              >
+                {listDom}
+              </Card>
+            )}
+          >
+            <Row gutter={24}>
+              <Col xs={24} md={12} xl={6}>
+                <ProFormText
+                  name="name"
+                  label={intl.formatMessage({
+                    id: 'application.parameter.name',
+                  })}
+                  rules={[
+                    { required: true },
+                    { pattern: /^[A-Za-z_][A-Za-z0-9_.-]*$/ },
+                  ]}
+                />
+              </Col>
+              <Col xs={24} md={12} xl={6}>
+                <ProFormText
+                  name="displayName"
+                  label={intl.formatMessage({
+                    id: 'application.parameter.displayName',
+                  })}
+                />
+              </Col>
+              <Col xs={24} md={12} xl={6}>
+                <ProFormSelect
+                  name="type"
+                  label={intl.formatMessage({
+                    id: 'application.parameter.type',
+                  })}
+                  options={parameterTypes}
+                  rules={[{ required: true }]}
+                />
+              </Col>
+              <Col xs={24} md={12} xl={6}>
+                <ProFormSwitch
+                  name="required"
+                  label={intl.formatMessage({
+                    id: 'application.parameter.required',
+                  })}
+                />
+              </Col>
+            </Row>
+            <Row gutter={24}>
+              <Col span={24}>
+                <ProFormTextArea
+                  name="description"
+                  label={intl.formatMessage({ id: 'application.description' })}
+                  fieldProps={{ rows: 2 }}
+                />
+              </Col>
+            </Row>
+            <Row gutter={24}>
+              <Col xs={24} lg={12}>
+                <ProFormTextArea
+                  name="defaultValueJson"
+                  label={intl.formatMessage({
+                    id: 'application.parameter.default',
+                  })}
+                  tooltip={intl.formatMessage({
+                    id: 'application.parameter.json.help',
+                  })}
+                  fieldProps={{ rows: 3 }}
+                />
+              </Col>
+              <Col xs={24} lg={12}>
+                <ProFormTextArea
+                  name="allowableValuesJson"
+                  label={intl.formatMessage({
+                    id: 'application.parameter.allowable',
+                  })}
+                  tooltip={intl.formatMessage({
+                    id: 'application.parameter.allowable.help',
+                  })}
+                  fieldProps={{ rows: 3 }}
+                />
+              </Col>
+            </Row>
+          </ProFormList>
+        </Card>
+      </PageContainer>
+    </ProForm>
   );
 };
 export default ApplicationForm;
