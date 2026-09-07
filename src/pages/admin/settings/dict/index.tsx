@@ -1,186 +1,329 @@
-import { HolderOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import {
+  EditableProTable,
+  ModalForm,
   PageContainer,
-  ProForm,
-  ProFormList,
   ProFormText,
   ProFormTextArea,
+  ProTable,
 } from '@ant-design/pro-components';
-import { useIntl } from '@umijs/max';
-import { Alert, Card, Col, Form, message, Row, Skeleton, Tabs } from 'antd';
-import { useEffect, useState } from 'react';
+import { FormattedMessage, useIntl } from '@umijs/max';
+import {
+  Drawer,
+  Empty,
+  message,
+  Popconfirm,
+  Space,
+  Typography,
+  theme,
+} from 'antd';
+import { useRef, useState } from 'react';
 import type {
   DataDictionaryDetail,
   DataDictionaryUpdate,
+  DictionaryLine,
 } from '@/services/data_dictionary';
 import {
-  getDataDictionary,
+  listDataDictionary,
   updateDataDictionary,
 } from '@/services/data_dictionary.api';
-import {
-  MARKET_APPLICATION_CATEGORY_DICTIONARY,
-  MARKET_APPLICATION_TAG_DICTIONARY,
-} from '@/services/data_dictionary.constants';
 
-const DictionaryEditor: React.FC<{ code: string }> = ({ code }) => {
-  const intl = useIntl();
-  const [form] = Form.useForm<DataDictionaryUpdate>();
-  const [dictionary, setDictionary] = useState<DataDictionaryDetail>();
-
-  useEffect(() => {
-    getDataDictionary({ code }).then((data) => {
-      setDictionary(data);
-      form.setFieldsValue({
-        name: data.name,
-        description: data.description,
-        lines: data.lines || [],
-      });
-    });
-  }, [code, form]);
-
-  if (!dictionary) {
-    return (
-      <Card variant="borderless">
-        <Skeleton active paragraph={{ rows: 7 }} />
-      </Card>
-    );
-  }
-
-  return (
-    <ProForm<DataDictionaryUpdate>
-      form={form}
-      layout="vertical"
-      onFinish={async (values) => {
-        const updated = await updateDataDictionary({ code }, values);
-        setDictionary(updated);
-        form.setFieldsValue(updated);
-        message.success(
-          intl.formatMessage({ id: 'model.dict.update.success' }),
-        );
-        return true;
-      }}
-      submitter={{
-        searchConfig: {
-          submitText: intl.formatMessage({ id: 'pages.operation.save' }),
-        },
-        resetButtonProps: { style: { display: 'none' } },
-      }}
-    >
-      <Card variant="borderless">
-        <Row gutter={32}>
-          <Col xs={24} lg={12}>
-            <ProFormText
-              name="name"
-              label={intl.formatMessage({ id: 'model.dict.name' })}
-              rules={[{ required: true }]}
-            />
-          </Col>
-          <Col xs={24} lg={12}>
-            <Form.Item label={intl.formatMessage({ id: 'model.dict.code' })}>
-              <Alert
-                type="info"
-                showIcon
-                message={dictionary.code}
-                description={intl.formatMessage({
-                  id: 'model.dict.code.cannot.modify',
-                })}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-        <ProFormTextArea
-          name="description"
-          label={intl.formatMessage({ id: 'model.dict.description' })}
-          fieldProps={{ rows: 2 }}
-        />
-      </Card>
-
-      <Card
-        variant="borderless"
-        title={intl.formatMessage({ id: 'model.dict.line' })}
-        style={{ marginTop: 16 }}
-      >
-        <Alert
-          type="warning"
-          showIcon
-          message={intl.formatMessage({ id: 'model.dict.line.help' })}
-          style={{ marginBottom: 16 }}
-        />
-        <ProFormList
-          name="lines"
-          creatorButtonProps={{
-            creatorButtonText: intl.formatMessage({
-              id: 'model.dict.line.add',
-            }),
-          }}
-          itemRender={({ listDom, action }, { index }) => (
-            <Card
-              size="small"
-              title={
-                <span>
-                  <HolderOutlined style={{ marginRight: 8 }} />
-                  {intl.formatMessage({ id: 'model.dict.line' })} {index + 1}
-                </span>
-              }
-              extra={action}
-              style={{ marginBottom: 12 }}
-            >
-              {listDom}
-            </Card>
-          )}
-        >
-          <Row gutter={24}>
-            <Col xs={24} md={12}>
-              <ProFormText
-                name="label"
-                label={intl.formatMessage({ id: 'model.dict.label' })}
-                rules={[{ required: true }]}
-              />
-            </Col>
-            <Col xs={24} md={12}>
-              <ProFormText
-                name="value"
-                label={intl.formatMessage({ id: 'model.dict.value' })}
-                rules={[{ required: true }]}
-              />
-            </Col>
-          </Row>
-        </ProFormList>
-      </Card>
-    </ProForm>
-  );
+type EditableDictionaryLine = DictionaryLine & {
+  rowKey: string;
+  isNew?: boolean;
 };
 
-const DataDictionaryPage: React.FC = () => {
+const toEditableLines = (
+  lines: DictionaryLine[] = [],
+): EditableDictionaryLine[] =>
+  lines.map((line, index) => ({
+    ...line,
+    rowKey: `${line.value}-${index}`,
+  }));
+
+const DictTableList: React.FC = () => {
+  const { token } = theme.useToken();
   const intl = useIntl();
+  const actionRef = useRef<ActionType>(null);
+  const [info, setInfo] = useState<DataDictionaryDetail>();
+  const [lines, setLines] = useState<EditableDictionaryLine[]>([]);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [drawerSize, setDrawerSize] = useState(800);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const openLines = (dictionary: DataDictionaryDetail) => {
+    setInfo(dictionary);
+    setLines(toEditableLines(dictionary.lines));
+    setDrawerVisible(true);
+  };
+
+  const persistLines = async (nextLines: EditableDictionaryLine[]) => {
+    if (!info?.code || !info.name) {
+      message.error(intl.formatMessage({ id: 'model.dict.save.first' }));
+      return;
+    }
+    const normalizedLines = nextLines.map((line, index) => ({
+      label: line.label,
+      value: line.value,
+      index: line.index ?? index + 1,
+    }));
+    const updated = await updateDataDictionary(
+      { code: info.code },
+      {
+        name: info.name,
+        description: info.description,
+        lines: normalizedLines,
+      },
+    );
+    setInfo(updated);
+    setLines(toEditableLines(updated.lines));
+    actionRef.current?.reload();
+  };
+
+  const columns: ProColumns<DataDictionaryDetail>[] = [
+    {
+      title: intl.formatMessage({ id: 'model.dict.name' }),
+      dataIndex: 'name',
+      render: (dom, entity) => <a onClick={() => openLines(entity)}>{dom}</a>,
+    },
+    {
+      title: intl.formatMessage({ id: 'model.dict.code' }),
+      dataIndex: 'code',
+      valueType: 'text',
+      tooltip: {
+        color: token.colorPrimary,
+        title: <FormattedMessage id="model.dict.code.cannot.modify" />,
+      },
+    },
+    {
+      title: intl.formatMessage({ id: 'model.dict.description' }),
+      dataIndex: 'description',
+      search: false,
+      valueType: 'text',
+    },
+    {
+      title: <FormattedMessage id="pages.operation" />,
+      key: 'action',
+      valueType: 'option',
+      render: (_, record) => (
+        <a
+          onClick={() => {
+            setInfo(record);
+            setModalVisible(true);
+          }}
+        >
+          <EditOutlined style={{ color: token.colorPrimary }} />
+        </a>
+      ),
+    },
+  ];
+
+  const lineColumns: ProColumns<EditableDictionaryLine>[] = [
+    {
+      title: intl.formatMessage({ id: 'model.dict.name' }),
+      dataIndex: 'label',
+      search: false,
+      formItemProps: { rules: [{ required: true }] },
+    },
+    {
+      title: intl.formatMessage({ id: 'model.dict.code' }),
+      dataIndex: 'value',
+      search: false,
+      valueType: 'text',
+      editable: (_, record) => Boolean(record.isNew),
+      formItemProps: { rules: [{ required: true }] },
+      tooltip: {
+        color: token.colorPrimary,
+        title: <FormattedMessage id="model.dict.code.cannot.modify" />,
+      },
+    },
+    {
+      title: intl.formatMessage({ id: 'model.dict.index' }),
+      dataIndex: 'index',
+      search: false,
+      valueType: 'digit',
+      width: 120,
+    },
+    {
+      title: <FormattedMessage id="pages.operation" />,
+      key: 'action',
+      valueType: 'option',
+      width: 100,
+      render: (_, record, __, action) => (
+        <Space orientation="horizontal">
+          <a onClick={() => action?.startEditable(record.rowKey)}>
+            <EditOutlined style={{ color: token.colorPrimary }} />
+          </a>
+          <Popconfirm
+            title={intl.formatMessage({
+              id: 'pages.operation.delete.confirm.title',
+            })}
+            onConfirm={async () => {
+              const hide = message.loading(
+                intl.formatMessage({ id: 'pages.operation.deleting' }),
+              );
+              try {
+                await persistLines(
+                  lines.filter((line) => line.rowKey !== record.rowKey),
+                );
+                hide();
+                message.success(
+                  intl.formatMessage({
+                    id: 'pages.operation.delete.success',
+                  }),
+                );
+              } catch {
+                hide();
+                message.error(
+                  intl.formatMessage({ id: 'pages.operation.delete.failed' }),
+                );
+              }
+            }}
+          >
+            <a className="danger">
+              <DeleteOutlined style={{ color: token.colorError }} />
+            </a>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
   return (
     <PageContainer
-      title={intl.formatMessage({ id: 'menu.settings.dict' })}
-      subTitle={intl.formatMessage({ id: 'model.dict.page.description' })}
+      header={{ breadcrumb: {} }}
+      title={<FormattedMessage id="menu.settings.dict" />}
     >
-      <Tabs
-        destroyOnHidden
-        items={[
-          {
-            key: MARKET_APPLICATION_CATEGORY_DICTIONARY,
-            label: intl.formatMessage({
-              id: 'model.dict.application.category',
+      <ProTable<DataDictionaryDetail>
+        key="dict-list"
+        scroll={{ x: 'max-content' }}
+        actionRef={actionRef}
+        rowKey="id"
+        search={{ showHiddenNum: true }}
+        request={async (params) => {
+          const response = await listDataDictionary();
+          const name = String(params.name || '').toLowerCase();
+          const code = String(params.code || '').toLowerCase();
+          const data = (response.data || []).filter(
+            (item) =>
+              (!name || item.name?.toLowerCase().includes(name)) &&
+              (!code || item.code?.toLowerCase().includes(code)),
+          );
+          return { data, total: data.length, success: true };
+        }}
+        columns={columns}
+        pagination={{
+          showQuickJumper: true,
+          showSizeChanger: true,
+          locale: {
+            items_per_page: intl.formatMessage({
+              id: 'pages.pagination.items_per_page',
             }),
-            children: (
-              <DictionaryEditor code={MARKET_APPLICATION_CATEGORY_DICTIONARY} />
-            ),
+            jump_to: intl.formatMessage({ id: 'pages.pagination.jump_to' }),
+            page: intl.formatMessage({ id: 'pages.pagination.page' }),
           },
-          {
-            key: MARKET_APPLICATION_TAG_DICTIONARY,
-            label: intl.formatMessage({ id: 'model.dict.application.tag' }),
-            children: (
-              <DictionaryEditor code={MARKET_APPLICATION_TAG_DICTIONARY} />
-            ),
-          },
-        ]}
+        }}
+        locale={{
+          emptyText: (
+            <Empty
+              description={intl.formatMessage({ id: 'pages.no.data' })}
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          ),
+        }}
       />
+
+      <Drawer
+        destroyOnHidden
+        size={drawerSize}
+        resizable={{ onResize: (newSize) => setDrawerSize(newSize) }}
+        open={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+        closable
+      >
+        <Typography.Title level={4}>
+          <FormattedMessage id="model.dict.line" />
+        </Typography.Title>
+        <EditableProTable<EditableDictionaryLine>
+          locale={{
+            emptyText: intl.formatMessage({ id: 'pages.not.found.data' }),
+          }}
+          rowKey="rowKey"
+          value={lines}
+          onChange={(value) => setLines([...value])}
+          columns={lineColumns}
+          recordCreatorProps={{
+            record: () => ({
+              rowKey: `new-${Date.now()}`,
+              label: '',
+              value: '',
+              index: lines.length + 1,
+              isNew: true,
+            }),
+          }}
+          editable={{
+            type: 'single',
+            onSave: async (rowKey, data) => {
+              const nextLines = lines.map((line) =>
+                line.rowKey === rowKey
+                  ? { ...data, rowKey: String(rowKey), isNew: false }
+                  : line,
+              );
+              await persistLines(nextLines);
+              message.success(
+                intl.formatMessage({
+                  id: data.isNew
+                    ? 'pages.operation.add.success'
+                    : 'pages.operation.update.success',
+                }),
+              );
+            },
+          }}
+        />
+      </Drawer>
+
+      <ModalForm<DataDictionaryUpdate>
+        title={info?.code}
+        width="40vw"
+        key={info?.id}
+        open={modalVisible}
+        initialValues={info}
+        clearOnDestroy
+        onOpenChange={setModalVisible}
+        onFinish={async (values) => {
+          if (!info?.code) return false;
+          await updateDataDictionary(
+            { code: info.code },
+            { ...values, lines: info.lines || [] },
+          );
+          setModalVisible(false);
+          actionRef.current?.reload();
+          message.success(
+            intl.formatMessage({ id: 'pages.operation.update.success' }),
+          );
+          return true;
+        }}
+        modalProps={{
+          maskClosable: true,
+          destroyOnHidden: true,
+          forceRender: true,
+          zIndex: 2000,
+        }}
+      >
+        <ProFormText
+          label={intl.formatMessage({ id: 'model.dict.name' })}
+          name="name"
+          rules={[{ required: true, max: 255 }]}
+        />
+        <ProFormTextArea
+          label={intl.formatMessage({ id: 'model.dict.description' })}
+          name="description"
+          rules={[{ max: 255 }]}
+        />
+      </ModalForm>
     </PageContainer>
   );
 };
 
-export default DataDictionaryPage;
+export default DictTableList;

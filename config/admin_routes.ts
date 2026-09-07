@@ -1,20 +1,6 @@
 export default [
   {
     name: "appManagement",
-    icon: "appstoreAdd",
-    path: "/admin/application",
-    component: "./admin/application",
-    access: "adminAccess",
-  },
-  {
-    name: "settings.dict",
-    icon: "unorderedList",
-    path: "/admin/settings/dict",
-    component: "./admin/settings/dict",
-    access: "adminAccess",
-  },
-  {
-    name: "appManagement",
     path: "/admin/application/create",
     hideInMenu: true,
     component: "./admin/application/form",
@@ -72,4 +58,18 @@ export default [
   //     },
   //   ],
   // },
+  {
+    name: "appManagement",
+    icon: "appstoreAdd",
+    path: "/admin/application",
+    component: "./admin/application",
+    access: "adminAccess",
+  },
+  {
+    name: "settings.dict",
+    icon: "unorderedList",
+    path: "/admin/settings/dict",
+    component: "./admin/settings/dict",
+    access: "adminAccess",
+  },
 ];

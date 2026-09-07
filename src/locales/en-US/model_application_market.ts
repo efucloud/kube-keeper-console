@@ -81,6 +81,33 @@ export default {
     'Quote strings, for example "nginx"; use standard JSON for numbers, booleans, arrays, and objects.',
   'application.parameter.allowable.help':
     'Enter a JSON array; [{"name":"Label","value":"value"}] is also supported.',
+  'application.order': 'Order',
+  'application.resource.name': 'Resource name',
+  'application.resource.kind': 'Kind',
+  'application.resource.apiVersion': 'API version',
+  'application.parameter.edit': 'Edit parameter',
+  'application.parameter.refresh': 'Refresh from templates',
+  'application.parameter.refreshed':
+    'Parameters refreshed from template variables',
+  'application.parameter.duplicate': 'The parameter name already exists',
+  'application.parameter.delete.confirm': 'Delete this parameter?',
+  'application.parameter.delete.used':
+    'This parameter is still used by a template and cannot be deleted',
+  'application.parameter.name.description': 'Application deployment name',
+  'application.parameter.namespace.description': 'Target namespace',
+  'application.parameter.input.description': 'Enter {name}',
+  'application.template.add': 'Add template',
+  'application.template.import': 'Import templates',
+  'application.template.delete.confirm': 'Delete this template resource?',
+  'application.template.metadata.invalid':
+    'Templates must include apiVersion, kind, and metadata.name',
+  'application.template.content.empty': 'Enter a valid YAML resource',
+  'application.template.file': 'YAML files',
+  'application.template.file.drag': 'Click or drag YAML files here',
+  'application.template.file.description':
+    'Supports .yaml and .yml files, multiple files, and multi-document YAML',
+  'application.template.file.required': 'Select YAML files to import',
+  'application.template.file.invalid': 'Failed to read or parse YAML files',
   'application.deployments': 'Application deployments',
   'application.status': 'Status',
   'application.result': 'Result',
