@@ -26,6 +26,18 @@ export default [
     redirect: "/workplace",
   },
   {
+    name: "applicationMarket",
+    icon: "appstore",
+    path: "/market/application",
+    component: "./market/application",
+  },
+  {
+    name: "applicationMarket",
+    path: "/market/application/:id",
+    hideInMenu: true,
+    component: "./market/application/detail",
+  },
+  {
     path: "/versions",
     hideInMenu: true,
     menuRender: false,
@@ -62,4 +74,3 @@ export default [
     path: "/*",
   },
 ];
- 

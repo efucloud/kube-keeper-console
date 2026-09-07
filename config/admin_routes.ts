@@ -1,5 +1,26 @@
 export default [
   {
+    name: "appManagement",
+    icon: "appstoreAdd",
+    path: "/admin/application",
+    component: "./admin/application",
+    access: "adminAccess",
+  },
+  {
+    name: "appManagement",
+    path: "/admin/application/create",
+    hideInMenu: true,
+    component: "./admin/application/form",
+    access: "adminAccess",
+  },
+  {
+    name: "appManagement",
+    path: "/admin/application/:id/edit",
+    hideInMenu: true,
+    component: "./admin/application/form",
+    access: "adminAccess",
+  },
+  {
     name: "account",
     path: "/admin/account",
     component: "./admin/account",

@@ -14,5 +14,7 @@ declare module 'omit.js';
 declare module 'numeral';
 declare module 'mockjs';
 declare module 'react-fittext';
+declare module 'file-saver';
+declare module 'js-yaml';
 
 declare const REACT_APP_ENV: 'test' | 'dev' | 'pre' | false;

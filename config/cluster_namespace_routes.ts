@@ -1,4 +1,11 @@
-export default [
+ export default [
+  {
+    icon: "appstore",
+    name: "applicationDeployments",
+    path: "/kubernetes/namespace/applications",
+    component: "./kubernetes/namespace/application",
+    access: "clusterNamespaceAccess",
+  },
   {
     icon: "dashboard",
     name: "dashboard",
