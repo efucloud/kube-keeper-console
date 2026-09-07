@@ -72,36 +72,13 @@ type FormValues = {
   state?: boolean;
 };
 
-type ParameterFormValue = Omit<
-  ParameterDefinition,
-  'defaultValue' | 'allowableValues'
-> & {
-  defaultValueJson?: string;
+type ParameterFormValue = Omit<ParameterDefinition, 'allowableValues'> & {
   allowableValuesJson?: string;
 };
 
 type ImportFormValues = {
   templates?: UploadFile[];
 };
-
-const parameterTypes: ParameterDefinition['type'][] = [
-  'string',
-  'inputString',
-  'text',
-  'url',
-  'password',
-  'inputSecret',
-  'image',
-  'number',
-  'inputNumber',
-  'bool',
-  'stringArray',
-  'numberArray',
-  'object',
-  'float',
-  'base64Encode',
-  'gitRepo',
-];
 
 let templateSequence = 0;
 
@@ -114,6 +91,16 @@ const toJsonField = (value: unknown) =>
   value === undefined || value === null
     ? undefined
     : JSON.stringify(value, null, 2);
+
+const hasOnlyStringAllowableValues = (values: unknown[]) =>
+  values.every(
+    (value) =>
+      typeof value === 'string' ||
+      (typeof value === 'object' &&
+        value !== null &&
+        'value' in value &&
+        typeof value.value === 'string'),
+  );
 
 const readFileAsText = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -170,9 +157,8 @@ const ApplicationForm: React.FC = () => {
             name: item.name,
             displayName: item.displayName,
             required: item.required,
-            type: item.type,
             description: item.description,
-            defaultValueJson: toJsonField(item.defaultValue),
+            defaultValue: item.defaultValue,
             allowableValuesJson: toJsonField(item.allowableValues),
           })),
         );
@@ -201,7 +187,6 @@ const ApplicationForm: React.FC = () => {
             name,
             displayName: name,
             required: true,
-            type: 'string',
             description:
               name === 'name'
                 ? intl.formatMessage({
@@ -230,22 +215,24 @@ const ApplicationForm: React.FC = () => {
         throw new Error(`duplicate name: ${item.name}`);
       }
       names.add(item.name);
-      const defaultValue = item.defaultValueJson?.trim()
-        ? JSON.parse(item.defaultValueJson)
-        : undefined;
       const allowableValues = item.allowableValuesJson?.trim()
         ? JSON.parse(item.allowableValuesJson)
         : undefined;
       if (allowableValues !== undefined && !Array.isArray(allowableValues)) {
         throw new Error(`allowableValues of ${item.name} must be an array`);
       }
+      if (
+        allowableValues !== undefined &&
+        !hasOnlyStringAllowableValues(allowableValues)
+      ) {
+        throw new Error(`allowableValues of ${item.name} must contain strings`);
+      }
       return {
         name: item.name,
         displayName: item.displayName,
         required: Boolean(item.required),
-        type: item.type,
         description: item.description,
-        defaultValue,
+        defaultValue: item.defaultValue,
         allowableValues,
       };
     });
@@ -308,12 +295,6 @@ const ApplicationForm: React.FC = () => {
       width: 180,
     },
     {
-      title: intl.formatMessage({ id: 'application.parameter.type' }),
-      dataIndex: 'type',
-      width: 140,
-      render: (_, record) => <Tag color="blue">{record.type}</Tag>,
-    },
-    {
       title: intl.formatMessage({ id: 'application.parameter.required' }),
       dataIndex: 'required',
       width: 90,
@@ -324,10 +305,10 @@ const ApplicationForm: React.FC = () => {
     },
     {
       title: intl.formatMessage({ id: 'application.parameter.default' }),
-      dataIndex: 'defaultValueJson',
+      dataIndex: 'defaultValue',
       width: 180,
       ellipsis: true,
-      render: (_, record) => record.defaultValueJson || '-',
+      render: (_, record) => record.defaultValue || '-',
     },
     {
       title: intl.formatMessage({ id: 'application.description' }),
@@ -517,7 +498,7 @@ const ApplicationForm: React.FC = () => {
           <Alert
             type="info"
             showIcon
-            message={intl.formatMessage({ id: 'application.template.help' })}
+            title={intl.formatMessage({ id: 'application.template.help' })}
           />
           <DragSortTable<TemplateProps>
             columns={templateColumns}
@@ -682,7 +663,7 @@ const ApplicationForm: React.FC = () => {
         open={parameterModalOpen}
         onOpenChange={setParameterModalOpen}
         clearOnDestroy
-        initialValues={selectedParameter || { type: 'string', required: false }}
+        initialValues={selectedParameter || { required: false }}
         modalProps={{ destroyOnHidden: true }}
         onFinish={async (values) => {
           const record: ParameterFormValue = {
@@ -693,12 +674,13 @@ const ApplicationForm: React.FC = () => {
             required: Boolean(values.required),
           };
           try {
-            if (record.defaultValueJson?.trim()) {
-              JSON.parse(record.defaultValueJson);
-            }
             if (record.allowableValuesJson?.trim()) {
               const allowableValues = JSON.parse(record.allowableValuesJson);
-              if (!Array.isArray(allowableValues)) throw new Error();
+              if (
+                !Array.isArray(allowableValues) ||
+                !hasOnlyStringAllowableValues(allowableValues)
+              )
+                throw new Error();
             }
           } catch {
             message.error(
@@ -750,17 +732,6 @@ const ApplicationForm: React.FC = () => {
             />
           </Col>
           <Col xs={24} md={12}>
-            <ProFormSelect
-              name="type"
-              label={intl.formatMessage({ id: 'application.parameter.type' })}
-              options={parameterTypes.map((value) => ({
-                label: value,
-                value,
-              }))}
-              rules={[{ required: true }]}
-            />
-          </Col>
-          <Col xs={24} md={12}>
             <ProFormSwitch
               name="required"
               label={intl.formatMessage({
@@ -769,15 +740,11 @@ const ApplicationForm: React.FC = () => {
             />
           </Col>
           <Col xs={24} md={12}>
-            <ProFormTextArea
-              name="defaultValueJson"
+            <ProFormText
+              name="defaultValue"
               label={intl.formatMessage({
                 id: 'application.parameter.default',
               })}
-              tooltip={intl.formatMessage({
-                id: 'application.parameter.json.help',
-              })}
-              fieldProps={{ rows: 4 }}
             />
           </Col>
           <Col xs={24} md={12}>

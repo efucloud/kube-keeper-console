@@ -1,7 +1,5 @@
 export default {
   'application.home': 'Project home',
-  'application.json.invalid': 'Enter valid JSON',
-  'application.number.invalid': 'Enter a valid number',
   'application.market': 'Application Market',
   'application.market.description':
     'Browse applications, configure and validate them, then deploy to an accessible namespace.',
@@ -67,20 +65,17 @@ export default {
   'application.template.help':
     'Multi-document YAML is supported. Use _{{_ .parameter _}}_; name and namespace are injected automatically.',
   'application.parameters.help':
-    'Define the configuration requested during deployment, including labels, input types, defaults, and allowed values.',
+    'Define the string configuration requested during deployment, including display names, defaults, and allowed values.',
   'application.parameters.invalid': 'Invalid parameter JSON',
   'application.parameter': 'Parameter',
   'application.parameter.add': 'Add parameter',
   'application.parameter.name': 'Parameter name',
   'application.parameter.displayName': 'Display name',
-  'application.parameter.type': 'Type',
   'application.parameter.required': 'Required',
-  'application.parameter.default': 'Default value (JSON)',
+  'application.parameter.default': 'Default value',
   'application.parameter.allowable': 'Allowed values (JSON)',
-  'application.parameter.json.help':
-    'Quote strings, for example "nginx"; use standard JSON for numbers, booleans, arrays, and objects.',
   'application.parameter.allowable.help':
-    'Enter a JSON array; [{"name":"Label","value":"value"}] is also supported.',
+    'Enter a JSON string array; [{"name":"Label","value":"value"}] is also supported.',
   'application.order': 'Order',
   'application.resource.name': 'Resource name',
   'application.resource.kind': 'Kind',

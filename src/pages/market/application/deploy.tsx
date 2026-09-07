@@ -10,12 +10,10 @@ import {
   Drawer,
   Form,
   Input,
-  InputNumber,
   Modal,
   message,
   Select,
   Space,
-  Switch,
   Typography,
 } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
@@ -54,32 +52,17 @@ const getAllowableOptions = (parameter: ParameterDefinition) => {
     if (typeof item === 'object' && item !== null && 'value' in item) {
       const option = item as Record<string, unknown>;
       const value = option.value;
-      if (typeof value !== 'string' && typeof value !== 'number') return [];
+      if (typeof value !== 'string') return [];
       return [{ label: String(option.name ?? value), value }];
     }
-    if (typeof item !== 'string' && typeof item !== 'number') return [];
-    return [{ label: String(item), value: item }];
+    if (typeof item !== 'string') return [];
+    return [{ label: item, value: item }];
   });
 };
 
 const ParameterInput = ({ parameter }: { parameter: ParameterDefinition }) => {
   const options = getAllowableOptions(parameter);
-  if (parameter.type === 'stringArray' || parameter.type === 'numberArray')
-    return (
-      <Select
-        mode={options.length ? 'multiple' : 'tags'}
-        options={options.length ? options : undefined}
-        tokenSeparators={options.length ? undefined : [',']}
-      />
-    );
   if (options.length) return <Select options={options} />;
-  if (parameter.type === 'bool') return <Switch />;
-  if (['number', 'inputNumber', 'float'].includes(parameter.type))
-    return <InputNumber style={{ width: '100%' }} />;
-  if (parameter.type === 'password' || parameter.type === 'inputSecret')
-    return <Input.Password autoComplete="new-password" />;
-  if (parameter.type === 'text' || parameter.type === 'object')
-    return <Input.TextArea autoSize={{ minRows: 3, maxRows: 8 }} />;
   return <Input />;
 };
 
@@ -112,23 +95,8 @@ const DeployApplicationModal: React.FC<Props> = ({
     setPreviewOpen(false);
     const params = Object.fromEntries(
       (application?.parameters || [])
-        .filter(
-          (item) => item.defaultValue !== undefined || item.type === 'bool',
-        )
-        .map((item) => {
-          let value =
-            item.defaultValue !== undefined ? item.defaultValue : false;
-          if (
-            (item.type === 'stringArray' || item.type === 'numberArray') &&
-            !Array.isArray(value)
-          ) {
-            value = [value];
-          }
-          if (item.type === 'object' && typeof value !== 'string') {
-            value = JSON.stringify(value, null, 2);
-          }
-          return [item.name, value];
-        }),
+        .filter((item) => item.defaultValue !== undefined)
+        .map((item) => [item.name, item.defaultValue]),
     );
     const releaseName = application?.parameters?.find(
       (item) => item.name === 'name',
@@ -172,41 +140,7 @@ const DeployApplicationModal: React.FC<Props> = ({
     for (const parameter of application?.parameters || []) {
       const value = normalizedParams[parameter.name];
       if (value === undefined || value === null) continue;
-      if (parameter.type === 'numberArray' && Array.isArray(value)) {
-        const numbers = value.map(Number);
-        if (numbers.some((item) => !Number.isFinite(item))) {
-          form.setFields([
-            {
-              name: ['params', parameter.name],
-              errors: [
-                intl.formatMessage({ id: 'application.number.invalid' }),
-              ],
-            },
-          ]);
-          throw new Error('invalid number array parameter');
-        }
-        normalizedParams[parameter.name] = numbers;
-      }
-      if (parameter.type === 'stringArray' && !Array.isArray(value)) {
-        normalizedParams[parameter.name] = [String(value)];
-      }
-      if (parameter.type === 'object' && typeof value === 'string') {
-        if (!value.trim()) {
-          delete normalizedParams[parameter.name];
-          continue;
-        }
-        try {
-          normalizedParams[parameter.name] = JSON.parse(value);
-        } catch {
-          form.setFields([
-            {
-              name: ['params', parameter.name],
-              errors: [intl.formatMessage({ id: 'application.json.invalid' })],
-            },
-          ]);
-          throw new Error('invalid object parameter');
-        }
-      }
+      normalizedParams[parameter.name] = String(value);
     }
     request.params = normalizedParams;
     return request as ApplicationDeployRequest;
@@ -408,17 +342,7 @@ const DeployApplicationModal: React.FC<Props> = ({
                 name={['params', parameter.name]}
                 label={parameter.displayName || parameter.name}
                 tooltip={parameter.description}
-                valuePropName={parameter.type === 'bool' ? 'checked' : 'value'}
-                rules={
-                  parameter.type === 'bool'
-                    ? []
-                    : [
-                        { required: parameter.required },
-                        ...(parameter.type === 'url'
-                          ? [{ type: 'url' as const }]
-                          : []),
-                      ]
-                }
+                rules={[{ required: parameter.required }]}
               >
                 <ParameterInput parameter={parameter} />
               </Form.Item>

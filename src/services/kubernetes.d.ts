@@ -22,7 +22,7 @@ export type ApplicationKubernetesResource = {
 // ApplicationRenderResult 应用模版资源渲染结果
 export type ApplicationKubernetesResources = ApplicationKubernetesResource[];
 // Value 实现 driver.Valuer 接口，Value 返回 json value
-export type ApplicationRenderParams = Record<string, unknown>;
+export type ApplicationRenderParams = Record<string, string>;
 // ApplicationRenderResult 应用模版资源渲染结果
 export type ApplicationRenderResult = { 
   successes?: ApplicationKubernetesResource[];

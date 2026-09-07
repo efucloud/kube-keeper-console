@@ -1,7 +1,5 @@
 export default {
   'application.home': '项目主页',
-  'application.json.invalid': '请输入有效的 JSON',
-  'application.number.invalid': '请输入有效的数字',
   'application.market': '应用市场',
   'application.market.description':
     '浏览应用，完成配置与校验后部署到你有权限的命名空间。',
@@ -66,20 +64,17 @@ export default {
   'application.template.help':
     '支持多文档 YAML；参数使用 _{{_ .参数名 _}}_，系统会自动注入 name 和 namespace。',
   'application.parameters.help':
-    '定义部署应用时需要填写的配置项，可设置显示名称、输入类型、默认值和可选范围。',
+    '定义部署应用时需要填写的字符串配置项，可设置显示名称、默认值和可选范围。',
   'application.parameters.invalid': '参数定义 JSON 无效',
   'application.parameter': '参数',
   'application.parameter.add': '添加参数',
   'application.parameter.name': '参数名',
   'application.parameter.displayName': '显示名称',
-  'application.parameter.type': '类型',
   'application.parameter.required': '必填',
-  'application.parameter.default': '默认值（JSON）',
+  'application.parameter.default': '默认值',
   'application.parameter.allowable': '可选值（JSON）',
-  'application.parameter.json.help':
-    '字符串需带双引号，例如 "nginx"；数字、布尔、数组和对象使用标准 JSON。',
   'application.parameter.allowable.help':
-    '填写 JSON 数组；也支持 [{"name":"显示名","value":"值"}]。',
+    '填写 JSON 字符串数组；也支持 [{"name":"显示名","value":"值"}]。',
   'application.order': '顺序',
   'application.resource.name': '资源名称',
   'application.resource.kind': '资源类型',
