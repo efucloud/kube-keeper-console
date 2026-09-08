@@ -65,17 +65,14 @@ export default {
   'application.template.help':
     'Multi-document YAML is supported. Use _{{_ .parameter _}}_; name and namespace are injected automatically.',
   'application.parameters.help':
-    'Define the string configuration requested during deployment, including display names, defaults, and allowed values.',
-  'application.parameters.invalid': 'Invalid parameter JSON',
+    'Define the required string configuration requested during deployment, including display names and defaults.',
+  'application.parameters.invalid': 'Invalid parameter definition',
   'application.parameter': 'Parameter',
   'application.parameter.add': 'Add parameter',
   'application.parameter.name': 'Parameter name',
   'application.parameter.displayName': 'Display name',
-  'application.parameter.required': 'Required',
+  'application.parameter.description': 'Parameter description',
   'application.parameter.default': 'Default value',
-  'application.parameter.allowable': 'Allowed values (JSON)',
-  'application.parameter.allowable.help':
-    'Enter a JSON string array; [{"name":"Label","value":"value"}] is also supported.',
   'application.order': 'Order',
   'application.resource.name': 'Resource name',
   'application.resource.kind': 'Kind',

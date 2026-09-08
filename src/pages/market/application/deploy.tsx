@@ -18,7 +18,6 @@ import {
 } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import type { ApplicationDeployRequest } from '@/services/application';
-import type { ParameterDefinition } from '@/services/application_def';
 import type {
   ClusterNamespaceDetail,
   ClusterNamespaceDetailList,
@@ -44,26 +43,6 @@ type Props = {
   application?: MarketApplicationDetail;
   open: boolean;
   onClose: () => void;
-};
-
-const getAllowableOptions = (parameter: ParameterDefinition) => {
-  if (!Array.isArray(parameter.allowableValues)) return [];
-  return parameter.allowableValues.flatMap((item) => {
-    if (typeof item === 'object' && item !== null && 'value' in item) {
-      const option = item as Record<string, unknown>;
-      const value = option.value;
-      if (typeof value !== 'string') return [];
-      return [{ label: String(option.name ?? value), value }];
-    }
-    if (typeof item !== 'string') return [];
-    return [{ label: item, value: item }];
-  });
-};
-
-const ParameterInput = ({ parameter }: { parameter: ParameterDefinition }) => {
-  const options = getAllowableOptions(parameter);
-  if (options.length) return <Select options={options} />;
-  return <Input />;
 };
 
 const DeployApplicationModal: React.FC<Props> = ({
@@ -342,9 +321,9 @@ const DeployApplicationModal: React.FC<Props> = ({
                 name={['params', parameter.name]}
                 label={parameter.displayName || parameter.name}
                 tooltip={parameter.description}
-                rules={[{ required: parameter.required }]}
+                rules={[{ required: true }]}
               >
-                <ParameterInput parameter={parameter} />
+                <Input />
               </Form.Item>
             ))}
           <Form.Item

@@ -64,17 +64,14 @@ export default {
   'application.template.help':
     '支持多文档 YAML；参数使用 _{{_ .参数名 _}}_，系统会自动注入 name 和 namespace。',
   'application.parameters.help':
-    '定义部署应用时需要填写的字符串配置项，可设置显示名称、默认值和可选范围。',
-  'application.parameters.invalid': '参数定义 JSON 无效',
+    '定义部署应用时必须填写的字符串配置项，可设置显示名称和默认值。',
+  'application.parameters.invalid': '参数定义无效',
   'application.parameter': '参数',
   'application.parameter.add': '添加参数',
   'application.parameter.name': '参数名',
   'application.parameter.displayName': '显示名称',
-  'application.parameter.required': '必填',
+  'application.parameter.description': '参数说明',
   'application.parameter.default': '默认值',
-  'application.parameter.allowable': '可选值（JSON）',
-  'application.parameter.allowable.help':
-    '填写 JSON 字符串数组；也支持 [{"name":"显示名","value":"值"}]。',
   'application.order': '顺序',
   'application.resource.name': '资源名称',
   'application.resource.kind': '资源类型',

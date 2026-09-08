@@ -35,7 +35,6 @@ import {
   Tabs,
   Tag,
   Tooltip,
-  Typography,
   theme,
 } from 'antd';
 import type { RcFile, UploadFile } from 'antd/es/upload';
@@ -72,9 +71,7 @@ type FormValues = {
   state?: boolean;
 };
 
-type ParameterFormValue = Omit<ParameterDefinition, 'allowableValues'> & {
-  allowableValuesJson?: string;
-};
+type ParameterFormValue = ParameterDefinition;
 
 type ImportFormValues = {
   templates?: UploadFile[];
@@ -86,21 +83,6 @@ const createTemplate = (content: string): TemplateProps => ({
   ...getResourceInfo(content),
   key: `template-${Date.now()}-${templateSequence++}`,
 });
-
-const toJsonField = (value: unknown) =>
-  value === undefined || value === null
-    ? undefined
-    : JSON.stringify(value, null, 2);
-
-const hasOnlyStringAllowableValues = (values: unknown[]) =>
-  values.every(
-    (value) =>
-      typeof value === 'string' ||
-      (typeof value === 'object' &&
-        value !== null &&
-        'value' in value &&
-        typeof value.value === 'string'),
-  );
 
 const readFileAsText = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -156,10 +138,8 @@ const ApplicationForm: React.FC = () => {
           (data.parameters || []).map((item) => ({
             name: item.name,
             displayName: item.displayName,
-            required: item.required,
             description: item.description,
             defaultValue: item.defaultValue,
-            allowableValuesJson: toJsonField(item.allowableValues),
           })),
         );
         setTemplates((data.templates || []).map(createTemplate));
@@ -186,7 +166,6 @@ const ApplicationForm: React.FC = () => {
           existing.get(name) || {
             name,
             displayName: name,
-            required: true,
             description:
               name === 'name'
                 ? intl.formatMessage({
@@ -215,25 +194,11 @@ const ApplicationForm: React.FC = () => {
         throw new Error(`duplicate name: ${item.name}`);
       }
       names.add(item.name);
-      const allowableValues = item.allowableValuesJson?.trim()
-        ? JSON.parse(item.allowableValuesJson)
-        : undefined;
-      if (allowableValues !== undefined && !Array.isArray(allowableValues)) {
-        throw new Error(`allowableValues of ${item.name} must be an array`);
-      }
-      if (
-        allowableValues !== undefined &&
-        !hasOnlyStringAllowableValues(allowableValues)
-      ) {
-        throw new Error(`allowableValues of ${item.name} must contain strings`);
-      }
       return {
         name: item.name,
         displayName: item.displayName,
-        required: Boolean(item.required),
         description: item.description,
         defaultValue: item.defaultValue,
-        allowableValues,
       };
     });
   };
@@ -295,15 +260,6 @@ const ApplicationForm: React.FC = () => {
       width: 180,
     },
     {
-      title: intl.formatMessage({ id: 'application.parameter.required' }),
-      dataIndex: 'required',
-      width: 90,
-      render: (_, record) =>
-        intl.formatMessage({
-          id: record.required ? 'application.yes' : 'application.no',
-        }),
-    },
-    {
       title: intl.formatMessage({ id: 'application.parameter.default' }),
       dataIndex: 'defaultValue',
       width: 180,
@@ -311,22 +267,10 @@ const ApplicationForm: React.FC = () => {
       render: (_, record) => record.defaultValue || '-',
     },
     {
-      title: intl.formatMessage({ id: 'application.description' }),
+      title: intl.formatMessage({ id: 'application.parameter.description' }),
       dataIndex: 'description',
       ellipsis: true,
-      render: (_, record) => (
-        <Space direction="vertical" size={0}>
-          <span>{record.description || '-'}</span>
-          {record.allowableValuesJson && (
-            <Typography.Text type="secondary" ellipsis>
-              {intl.formatMessage({
-                id: 'application.parameter.allowable',
-              })}
-              : {record.allowableValuesJson}
-            </Typography.Text>
-          )}
-        </Space>
-      ),
+      render: (_, record) => record.description || '-',
     },
     {
       title: intl.formatMessage({ id: 'application.actions' }),
@@ -663,7 +607,7 @@ const ApplicationForm: React.FC = () => {
         open={parameterModalOpen}
         onOpenChange={setParameterModalOpen}
         clearOnDestroy
-        initialValues={selectedParameter || { required: false }}
+        initialValues={selectedParameter}
         modalProps={{ destroyOnHidden: true }}
         onFinish={async (values) => {
           const record: ParameterFormValue = {
@@ -671,23 +615,7 @@ const ApplicationForm: React.FC = () => {
             name: values.name.trim(),
             displayName: values.displayName?.trim(),
             description: values.description?.trim(),
-            required: Boolean(values.required),
           };
-          try {
-            if (record.allowableValuesJson?.trim()) {
-              const allowableValues = JSON.parse(record.allowableValuesJson);
-              if (
-                !Array.isArray(allowableValues) ||
-                !hasOnlyStringAllowableValues(allowableValues)
-              )
-                throw new Error();
-            }
-          } catch {
-            message.error(
-              intl.formatMessage({ id: 'application.parameters.invalid' }),
-            );
-            return false;
-          }
           const duplicate = parameters.some(
             (item) =>
               item.name === record.name &&
@@ -732,14 +660,6 @@ const ApplicationForm: React.FC = () => {
             />
           </Col>
           <Col xs={24} md={12}>
-            <ProFormSwitch
-              name="required"
-              label={intl.formatMessage({
-                id: 'application.parameter.required',
-              })}
-            />
-          </Col>
-          <Col xs={24} md={12}>
             <ProFormText
               name="defaultValue"
               label={intl.formatMessage({
@@ -747,22 +667,12 @@ const ApplicationForm: React.FC = () => {
               })}
             />
           </Col>
-          <Col xs={24} md={12}>
-            <ProFormTextArea
-              name="allowableValuesJson"
-              label={intl.formatMessage({
-                id: 'application.parameter.allowable',
-              })}
-              tooltip={intl.formatMessage({
-                id: 'application.parameter.allowable.help',
-              })}
-              fieldProps={{ rows: 4 }}
-            />
-          </Col>
           <Col span={24}>
             <ProFormTextArea
               name="description"
-              label={intl.formatMessage({ id: 'application.description' })}
+              label={intl.formatMessage({
+                id: 'application.parameter.description',
+              })}
               fieldProps={{ rows: 3 }}
             />
           </Col>
