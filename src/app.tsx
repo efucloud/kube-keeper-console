@@ -77,7 +77,16 @@ export async function getInitialState(): Promise<{
 
   const fetchAppList = async () => {
     let app = [] as AppItemProps[];
-    const { cluster } = getCurrentViewInfo();
+    const currentView = getCurrentViewInfo();
+    const helmPageQuery = new URLSearchParams(history.location.search);
+    const cluster = currentView.cluster ||
+      (history.location.pathname.startsWith('/market/helm')
+        ? helmPageQuery.get('cluster') || ''
+        : '');
+    const namespace = currentView.namespace ||
+      (history.location.pathname.startsWith('/market/helm')
+        ? helmPageQuery.get('namespace') || ''
+        : '');
     if (cluster) {
       app.push({
         title: getI18nLanguage() === 'en-US' ? 'Application Market' : '应用市场',
@@ -88,16 +97,20 @@ export async function getInitialState(): Promise<{
         url: '/market/application',
         target: '_blank',
       } as AppItemProps);
-      app.push({
-        title: getI18nLanguage() === 'en-US' ? 'Helm Store' : 'Helm 商店',
-        desc: getI18nLanguage() === 'en-US'
-          ? 'Discover charts from synchronized Helm repositories'
-          : '从已同步的 Helm 仓库发现 Chart',
-        icon: <AppstoreOutlined style={{ fontSize: '30px' }} />,
-        url: '/market/helm',
-        target: '_blank',
-      } as AppItemProps);
     }
+    const helmView = new URLSearchParams();
+    if (cluster) helmView.set('cluster', cluster);
+    if (namespace) helmView.set('namespace', namespace);
+    const helmQuery = helmView.toString();
+    app.push({
+      title: getI18nLanguage() === 'en-US' ? 'Helm Store' : 'Helm 商店',
+      desc: getI18nLanguage() === 'en-US'
+        ? 'Discover and deploy charts to Kubernetes'
+        : '发现 Helm Chart 并部署到 Kubernetes',
+      icon: <AppstoreOutlined style={{ fontSize: '30px' }} />,
+      url: helmQuery ? `/market/helm?${helmQuery}` : '/market/helm',
+      target: '_blank',
+    } as AppItemProps);
     return app as AppListProps;
   };
   const { location } = history;

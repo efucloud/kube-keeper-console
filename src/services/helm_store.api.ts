@@ -2,6 +2,7 @@ import { request } from '@umijs/max';
 
 import { BatchOperationIds } from './common.d';
 import { HelmRepositoryCreate, HelmRepositoryDetail, HelmRepositoryDetailList, HelmRepositoryUpdate } from './helm_repository.d';
+import { HelmStoreValues } from './helm_store.d';
 
 //删除Helm仓库
 //
@@ -97,6 +98,30 @@ export async function getHelmStoreChart<ChartDetail>(
   options?: { [key: string]: any }) {
   const { chart, repository, ...rest } = params;
   return request<ChartDetail>(`/api/v1/helm-store/charts/${repository}/${chart}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...rest },
+    ...(options || {}),
+  });
+}
+//获取Helm Chart原始values.yaml
+//
+//请求方法: GET
+//请求地址: /api/v1/helm-store/charts/{repository}/{chart}/{version}/values
+//参数名: chart 参数类型: string 参数位置: path 是否必须: true  参数说明: Chart名称
+//参数名: repository 参数类型: string 参数位置: path 是否必须: true  参数说明: 仓库ID
+//参数名: version 参数类型: string 参数位置: path 是否必须: true  参数说明: Chart版本
+export async function getHelmStoreChartValues<HelmStoreValues>(
+  params: {
+    chart: string;// Chart名称
+    repository: string;// 仓库ID
+    version: string;// Chart版本
+  },
+  options?: { [key: string]: any }) {
+  const { chart, repository, version, ...rest } = params;
+  return request<HelmStoreValues>(`/api/v1/helm-store/charts/${repository}/${chart}/${version}/values`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

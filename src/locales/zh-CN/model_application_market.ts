@@ -52,6 +52,7 @@ export default {
   'application.deleted': '删除成功',
   'application.imported': '导入成功',
   'application.import': '导入',
+  'application.export': '导出 YAML',
   'application.create': '新建应用',
   'application.edit': '编辑应用',
   'application.delete.confirm': '确认删除这个市场应用？',

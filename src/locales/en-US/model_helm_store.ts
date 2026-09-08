@@ -30,6 +30,25 @@ export default {
   'helm.chartDetail': 'Chart details',
   'helm.created': 'Published',
   'helm.package': 'Package URL',
+  'helm.deploy': 'Deploy',
+  'helm.deploy.success': 'Helm release {release} deployed',
+  'helm.deploy.cluster': 'Target cluster',
+  'helm.deploy.cluster.placeholder': 'Select an accessible cluster',
+  'helm.deploy.namespace': 'Target namespace',
+  'helm.deploy.namespace.placeholder': 'Select a namespace',
+  'helm.deploy.releaseName': 'Release name',
+  'helm.deploy.releaseName.rule':
+    'Use lowercase letters, numbers, and hyphens only',
+  'helm.deploy.values': 'values.yaml',
+  'helm.deploy.values.tooltip':
+    'The complete original values.yaml from the chart package. Review or edit it before deployment; the edited content is submitted during installation.',
+  'helm.deploy.values.loadFailed':
+    'Unable to load the chart values.yaml. Retry before deploying.',
+  'helm.deploy.values.reload': 'Reload',
+  'helm.deploy.targetInherited':
+    'The current cluster is preselected. Choose a target namespace to continue.',
+  'helm.deploy.targetRequired':
+    'No cluster context is available. Select a target cluster and namespace.',
   'helm.noDescription': 'No chart description',
   'helm.empty':
     'No matching Helm charts. Make sure a repository has synced successfully.',

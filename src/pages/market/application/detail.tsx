@@ -1,5 +1,6 @@
 import {
   AppstoreOutlined,
+  DownloadOutlined,
   ExportOutlined,
   RocketOutlined,
 } from '@ant-design/icons';
@@ -31,6 +32,7 @@ import {
 } from '@/services/data_dictionary.constants';
 import type { MarketApplicationDetail } from '@/services/market_application';
 import { getMarketApplication } from '@/services/market_application.api';
+import { downloadMarketApplicationYaml } from '@/utils/marketApplicationTransfer';
 import DeployApplicationModal from './deploy';
 
 const ApplicationDetailPage: React.FC = () => {
@@ -105,6 +107,14 @@ const ApplicationDetailPage: React.FC = () => {
             }
             extra={
               <Space>
+                <Button
+                  icon={<DownloadOutlined />}
+                  onClick={() =>
+                    void downloadMarketApplicationYaml(info.id, info.name)
+                  }
+                >
+                  {intl.formatMessage({ id: 'application.export' })}
+                </Button>
                 {info.home && (
                   <Button
                     icon={<ExportOutlined />}

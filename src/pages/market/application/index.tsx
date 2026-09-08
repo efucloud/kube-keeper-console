@@ -1,5 +1,6 @@
 import {
   AppstoreOutlined,
+  DownloadOutlined,
   ExportOutlined,
   RocketOutlined,
 } from '@ant-design/icons';
@@ -16,6 +17,7 @@ import {
   List,
   Pagination,
   Skeleton,
+  Space,
   Tag,
   Typography,
   theme,
@@ -31,6 +33,7 @@ import {
 } from '@/services/data_dictionary.constants';
 import type { MarketApplicationDetail } from '@/services/market_application';
 import { listMarketApplication } from '@/services/market_application.api';
+import { downloadMarketApplicationYaml } from '@/utils/marketApplicationTransfer';
 import DeployApplicationModal from './deploy';
 import styles from './index.less';
 
@@ -232,18 +235,33 @@ const MarketApplicationPage: React.FC = () => {
                       ? dayjs(item.createdAt).format('YYYY.MM.DD')
                       : ''}
                   </Typography.Text>
-                  <Button
-                    type="text"
-                    size="small"
-                    icon={<RocketOutlined />}
-                    style={{ color: token.colorPrimary }}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setDeploying(item);
-                    }}
-                  >
-                    {intl.formatMessage({ id: 'application.deploy' })}
-                  </Button>
+                  <Space size={2}>
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<DownloadOutlined />}
+                      aria-label={intl.formatMessage({
+                        id: 'application.export',
+                      })}
+                      title={intl.formatMessage({ id: 'application.export' })}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void downloadMarketApplicationYaml(item.id, item.name);
+                      }}
+                    />
+                    <Button
+                      type="text"
+                      size="small"
+                      icon={<RocketOutlined />}
+                      style={{ color: token.colorPrimary }}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setDeploying(item);
+                      }}
+                    >
+                      {intl.formatMessage({ id: 'application.deploy' })}
+                    </Button>
+                  </Space>
                 </div>
               </Card>
             </List.Item>

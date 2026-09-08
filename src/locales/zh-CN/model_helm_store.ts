@@ -30,6 +30,23 @@ export default {
   'helm.chartDetail': 'Chart 详情',
   'helm.created': '发布时间',
   'helm.package': '安装包地址',
+  'helm.deploy': '部署',
+  'helm.deploy.success': 'Helm Release {release} 部署成功',
+  'helm.deploy.cluster': '目标集群',
+  'helm.deploy.cluster.placeholder': '选择有权限的集群',
+  'helm.deploy.namespace': '目标命名空间',
+  'helm.deploy.namespace.placeholder': '选择命名空间',
+  'helm.deploy.releaseName': 'Release 名称',
+  'helm.deploy.releaseName.rule': '只能使用小写字母、数字和连字符',
+  'helm.deploy.values': 'values.yaml',
+  'helm.deploy.values.tooltip':
+    '来自 Chart 安装包的完整原始 values.yaml，可查看并修改；部署时会提交修改后的内容',
+  'helm.deploy.values.loadFailed':
+    '无法获取 Chart 的 values.yaml，请重试后再部署。',
+  'helm.deploy.values.reload': '重新获取',
+  'helm.deploy.targetInherited': '已带入当前集群，可继续选择目标命名空间。',
+  'helm.deploy.targetRequired':
+    '当前没有集群上下文，请先选择目标集群和命名空间。',
   'helm.noDescription': '暂无 Chart 说明',
   'helm.empty': '没有匹配的 Helm Chart，请确认仓库已成功同步。',
 };

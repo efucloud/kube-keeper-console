@@ -1,173 +1,161 @@
+import {
+  CheckCircleFilled,
+  ExportOutlined,
+  GithubOutlined,
+  SafetyCertificateOutlined,
+} from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { useIntl } from '@umijs/max';
-import { type FC } from 'react';
-import { Card, Tag } from 'antd';
-import { CheckCircleOutlined } from '@ant-design/icons';
-import { getColorPrimary } from '@/utils/global';
+import { Button, Card, Tag, Typography, theme } from 'antd';
+import type { FC, ReactNode } from 'react';
+import styles from './index.less';
+
+type Plan = {
+  key: string;
+  titleKey: string;
+  descriptionKey: string;
+  badgeKey: string;
+  icon: ReactNode;
+  featureKeys: string[];
+  actionKey: string;
+  actionIcon: ReactNode;
+  actionUrl: string;
+  featured?: boolean;
+};
+
+const plans: Plan[] = [
+  {
+    key: 'open-source',
+    titleKey: 'pages.versions.card.opensource.title',
+    descriptionKey: 'pages.versions.card.opensource.description',
+    badgeKey: 'pages.versions.card.opensource.badge',
+    icon: <GithubOutlined />,
+    featureKeys: [
+      'pages.versions.card.opensource.feature.1',
+      'pages.versions.card.opensource.feature.2',
+      'pages.versions.card.opensource.feature.3',
+      'pages.versions.card.opensource.feature.4',
+      'pages.versions.card.opensource.feature.5',
+      'pages.versions.card.opensource.feature.6',
+      'pages.versions.card.opensource.feature.7',
+    ],
+    actionKey: 'pages.versions.card.opensource.action',
+    actionIcon: <GithubOutlined />,
+    actionUrl: 'https://github.com/efucloud/kube-keeper',
+  },
+  {
+    key: 'saas',
+    titleKey: 'pages.versions.card.saas.title',
+    descriptionKey: 'pages.versions.card.saas.description',
+    badgeKey: 'pages.versions.card.saas.badge',
+    icon: <SafetyCertificateOutlined />,
+    featureKeys: [
+      'pages.versions.card.saas.feature.1',
+      'pages.versions.card.saas.feature.2',
+      'pages.versions.card.saas.feature.3',
+      'pages.versions.card.saas.feature.4',
+      'pages.versions.card.saas.feature.5',
+      'pages.versions.card.saas.feature.6',
+      'pages.versions.card.saas.feature.7',
+    ],
+    actionKey: 'pages.versions.card.saas.action',
+    actionIcon: <ExportOutlined />,
+    actionUrl: 'https://efucloud.com',
+    featured: true,
+  },
+];
 
 const VersionIndex: FC = () => {
   const intl = useIntl();
-  const colorPrimary = getColorPrimary();
-  const versions = [
-    {
-      titleKey: 'pages.versions.card.community.title',
-      key: 'community',
-      featureKeys: [
-        'pages.versions.card.community.feature.1',
-        'pages.versions.card.saas.feature.3',
-        'pages.versions.card.saas.feature.4',
-        'pages.versions.card.community.feature.5',
-        'pages.versions.card.community.feature.6',
-      ],
-      tag: null,
-    },
-
-    {
-      titleKey: 'pages.versions.card.enterprise.title',
-      key: 'enterprise',
-      featureKeys: [
-        'pages.versions.card.enterprise.feature.1',
-        'pages.versions.card.saas.feature.3',
-        'pages.versions.card.saas.feature.4',
-        'pages.versions.card.enterprise.feature.4',
-        'pages.versions.card.enterprise.feature.5',
-        'pages.versions.card.enterprise.feature.6',
-      ],
-      tag: null,
-    },
-    {
-      titleKey: 'pages.versions.card.saas.title',
-      key: 'saas',
-      featureKeys: [
-        'pages.versions.card.saas.feature.1',
-        'pages.versions.card.saas.feature.2',
-        'pages.versions.card.saas.feature.3',
-        'pages.versions.card.saas.feature.4',
-        'pages.versions.card.saas.feature.5',
-        'pages.versions.card.saas.feature.6',
-        'pages.versions.card.saas.feature.7',
-        'pages.versions.card.saas.feature.8',
-        'pages.versions.card.saas.feature.9',
-        'pages.versions.card.saas.feature.10',
-      ],
-      tag: intl.formatMessage({ id: 'pages.versions.badge.hot' }),
-    },
-  ];
-
-  // 统一卡片尺寸
-  const cardWidth = 280;
-  const cardHeight = 480; // 可根据内容调整
+  const { token } = theme.useToken();
 
   return (
-    <PageContainer title={false}>
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: '0 auto',
-        }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
-            <h2 style={{ margin: 0, fontSize: 24, fontWeight: 600, color: 'rgba(0, 0, 0, 0.85)' }}>
-              {intl.formatMessage({ id: 'pages.versions.title' })}
-            </h2>
-            <a
-              href="https://efucloud.com"
+    <PageContainer title={false} className={styles.page}>
+      <section className={styles.hero}>
+        <Tag bordered={false} color="processing" className={styles.eyebrow}>
+          {intl.formatMessage({ id: 'pages.versions.eyebrow' })}
+        </Tag>
+        <Typography.Title level={1} className={styles.title}>
+          {intl.formatMessage({ id: 'pages.versions.title' })}
+        </Typography.Title>
+        <Typography.Paragraph type="secondary" className={styles.description}>
+          {intl.formatMessage({ id: 'pages.versions.description' })}
+        </Typography.Paragraph>
+      </section>
+
+      <div className={styles.grid}>
+        {plans.map((plan) => (
+          <Card
+            key={plan.key}
+            className={`${styles.card} ${plan.featured ? styles.featured : ''}`}
+            style={
+              plan.featured
+                ? {
+                    borderColor: token.colorPrimaryBorder,
+                    background: `linear-gradient(180deg, ${token.colorPrimaryBg} 0%, ${token.colorBgContainer} 42%)`,
+                  }
+                : undefined
+            }
+          >
+            <div className={styles.cardHeader}>
+              <div
+                className={styles.planIcon}
+                style={{
+                  background: plan.featured
+                    ? token.colorPrimaryBg
+                    : token.colorFillSecondary,
+                  color: plan.featured
+                    ? token.colorPrimary
+                    : token.colorTextSecondary,
+                }}
+              >
+                {plan.icon}
+              </div>
+              <Tag
+                bordered={false}
+                color={plan.featured ? 'blue' : 'default'}
+                className={styles.planBadge}
+              >
+                {intl.formatMessage({ id: plan.badgeKey })}
+              </Tag>
+            </div>
+
+            <Typography.Title level={2} className={styles.planTitle}>
+              {intl.formatMessage({ id: plan.titleKey })}
+            </Typography.Title>
+            <Typography.Paragraph
+              type="secondary"
+              className={styles.planDescription}
+            >
+              {intl.formatMessage({ id: plan.descriptionKey })}
+            </Typography.Paragraph>
+
+            <ul className={styles.features}>
+              {plan.featureKeys.map((featureKey) => (
+                <li key={featureKey}>
+                  <CheckCircleFilled
+                    className={styles.featureIcon}
+                    style={{ color: token.colorSuccess }}
+                  />
+                  <span>{intl.formatMessage({ id: featureKey })}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Button
+              block
+              size="large"
+              type={plan.featured ? 'primary' : 'default'}
+              icon={plan.actionIcon}
+              href={plan.actionUrl}
               target="_blank"
               rel="noreferrer"
-              style={{ fontSize: 14, fontWeight: 500 }}
+              className={styles.action}
             >
-              {intl.formatMessage({ id: 'pages.versions.product.link' })}
-            </a>
-          </div>
-          <p style={{ color: 'rgba(0, 0, 0, 0.65)', fontSize: 14, marginTop: 8 }}>
-            {intl.formatMessage({ id: 'pages.versions.description' })}
-          </p>
-        </div>
-
-        {/* 使用 flex 容器确保对齐 */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 24,
-            flexWrap: 'wrap',
-          }}
-        >
-          {versions.map((version) => (
-            <Card
-              key={version.key}
-              style={{
-                width: cardWidth,
-                height: cardHeight,
-                borderRadius: 12,
-                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.05)',
-                border: '1px solid #f0f0f0',
-                position: 'relative',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-              bodyStyle={{
-                padding: 32,
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100%',
-              }}
-            >
-              {/* 热门标签 */}
-              {version.tag && (
-                <Tag
-                  color={colorPrimary}
-                  style={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    padding: '4px 8px',
-                    borderRadius: 4,
-                  }}
-                >
-                  {version.tag}
-                </Tag>
-              )}
-
-              {/* 标题 */}
-              <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 500 }}>
-                  {intl.formatMessage({ id: version.titleKey })}
-                </h3>
-              </div>
-
-              {/* 功能列表 - 自动撑满中间区域 */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-                {version.featureKeys.map((featureKey, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      marginBottom: 12,
-                    }}
-                  >
-                    <CheckCircleOutlined
-                      style={{
-                        color: colorPrimary,
-                        marginRight: 8,
-                        marginTop: 4,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span style={{ fontSize: 14, color: 'rgba(0, 0, 0, 0.85)' }}>
-                      {intl.formatMessage({ id: featureKey })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          ))}
-        </div>
+              {intl.formatMessage({ id: plan.actionKey })}
+            </Button>
+          </Card>
+        ))}
       </div>
     </PageContainer>
   );

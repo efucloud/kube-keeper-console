@@ -18,8 +18,6 @@ import {
   Tag,
   Upload,
 } from 'antd';
-import { saveAs } from 'file-saver';
-import * as yaml from 'js-yaml';
 import { useEffect, useRef, useState } from 'react';
 import type { DictionaryLine } from '@/services/data_dictionary';
 import { getDataDictionary } from '@/services/data_dictionary.api';
@@ -30,11 +28,11 @@ import {
 import type { MarketApplicationDetail } from '@/services/market_application';
 import {
   deleteMarketApplication,
-  exportMarketApplication,
   importMarketApplication,
   listMarketApplication,
   updateMarketApplicationState,
 } from '@/services/market_application.api';
+import { downloadMarketApplicationYaml } from '@/utils/marketApplicationTransfer';
 
 const ApplicationManagement: React.FC = () => {
   const intl = useIntl();
@@ -52,15 +50,6 @@ const ApplicationManagement: React.FC = () => {
   }, []);
   const dictionaryLabel = (lines: DictionaryLine[], value: string) =>
     lines.find((line) => line.value === value)?.label || value;
-  const exportApplication = async (record: MarketApplicationDetail) => {
-    const data = await exportMarketApplication({ id: record.id });
-    saveAs(
-      new Blob([yaml.dump(data, { noRefs: true, lineWidth: 120 })], {
-        type: 'application/yaml;charset=utf-8',
-      }),
-      `${record.name}.yaml`,
-    );
-  };
   const columns: ProColumns<MarketApplicationDetail>[] = [
     {
       title: intl.formatMessage({ id: 'application.name' }),
@@ -148,7 +137,9 @@ const ApplicationManagement: React.FC = () => {
           <Button
             type="text"
             icon={<DownloadOutlined />}
-            onClick={() => exportApplication(record)}
+            onClick={() =>
+              downloadMarketApplicationYaml(record.id, record.name)
+            }
           />
           <Popconfirm
             title={intl.formatMessage({ id: 'application.delete.confirm' })}
@@ -190,7 +181,7 @@ const ApplicationManagement: React.FC = () => {
         toolBarRender={() => [
           <Upload
             key="import"
-            accept=".yaml,.yml,.json"
+            accept=".yaml,.yml"
             showUploadList={false}
             beforeUpload={async (file) => {
               await importMarketApplication(await file.text());

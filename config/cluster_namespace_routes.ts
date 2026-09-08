@@ -1,12 +1,5 @@
  export default [
   {
-    icon: "appstore",
-    name: "applicationDeployments",
-    path: "/kubernetes/namespace/applications",
-    component: "./kubernetes/namespace/application",
-    access: "clusterNamespaceAccess",
-  },
-  {
     icon: "dashboard",
     name: "dashboard",
     path: "/kubernetes/namespace/dashboard",
@@ -32,6 +25,12 @@
     path: "/kubernetes/namespace/workload",
     access: "clusterNamespaceAccess",
     routes: [
+      {
+        name: "applicationDeployments",
+        path: "/kubernetes/namespace/workload/applications",
+        component: "./kubernetes/namespace/application",
+        access: "clusterNamespaceAccess",
+      },
       {
         name: "pod",
         path: "/kubernetes/namespace/workload/pods",
@@ -194,6 +193,13 @@
         access: "clusterNamespaceAccess",
       },
     ],
+  },
+  {
+    name: "applicationDeployments",
+    hideInMenu: true,
+    path: "/kubernetes/namespace/applications",
+    component: "./kubernetes/namespace/application",
+    access: "clusterNamespaceAccess",
   },
   {
     name: "config",

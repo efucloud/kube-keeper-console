@@ -1,0 +1,172 @@
+.page {
+  min-height: calc(100vh - 56px);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8% 4%, rgb(22 119 255 / 8%), transparent 30%),
+    radial-gradient(circle at 92% 88%, rgb(82 196 26 / 7%), transparent 28%);
+}
+
+.hero {
+  max-width: 760px;
+  margin: 36px auto 44px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.eyebrow {
+  margin-bottom: 14px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.title.title {
+  margin-bottom: 14px;
+  font-size: clamp(30px, 4vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.description.description {
+  max-width: 680px;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 440px));
+  gap: 24px;
+  justify-content: center;
+  max-width: 928px;
+  margin: 0 auto;
+  padding: 0 24px 56px;
+}
+
+.card {
+  height: 100%;
+  border-radius: 18px;
+  box-shadow: 0 14px 40px rgb(0 0 0 / 6%);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 50px rgb(0 0 0 / 10%);
+}
+
+.featured {
+  border-width: 1px;
+  box-shadow: 0 20px 54px rgb(22 119 255 / 16%);
+  transform: translateY(-6px);
+}
+
+.featured:hover {
+  transform: translateY(-9px);
+}
+
+.card :global(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
+  min-height: 540px;
+  padding: 30px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.planIcon {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  font-size: 22px;
+  place-items: center;
+}
+
+.planBadge {
+  margin: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.planTitle.planTitle {
+  margin: 0 0 10px;
+  font-size: 25px;
+  letter-spacing: -0.02em;
+}
+
+.planDescription.planDescription {
+  min-height: 50px;
+  margin-bottom: 24px;
+  line-height: 1.7;
+}
+
+.features {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 30px;
+  padding: 24px 0 0;
+  border-top: 1px solid rgb(5 5 5 / 8%);
+  list-style: none;
+}
+
+.features li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.55;
+}
+
+.featureIcon {
+  flex: none;
+  margin-top: 4px;
+  font-size: 15px;
+}
+
+.action {
+  height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .hero {
+    margin-top: 20px;
+    margin-bottom: 30px;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding-inline: 12px;
+  }
+
+  .card :global(.ant-card-body) {
+    min-height: 0;
+    padding: 24px;
+  }
+
+  .featured {
+    transform: none;
+  }
+
+  .featured:hover {
+    transform: translateY(-3px);
+  }
+
+  .planDescription.planDescription {
+    min-height: 0;
+  }
+}

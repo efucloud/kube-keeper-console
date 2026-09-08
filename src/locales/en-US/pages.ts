@@ -117,5 +117,5 @@ export default {
   "pages.operation.paste.forbidden": "Pages Operation Paste Forbidden",
   "pages.operation.clean.data": "Pages Operation Clean Data",
   "pages.operation.clean.data.description": "Pages Operation Clean Data description",
-  "pages.versions.select": "Versions Updated"
+  "pages.versions.select": "Versions & Services"
 };

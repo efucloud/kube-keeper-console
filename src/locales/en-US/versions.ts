@@ -1,42 +1,41 @@
 export default {
-  "pages.versions.title": "Version Options",
-  "pages.versions.description": "Choose the product plan that best fits your business needs.",
-  "pages.versions.product.link": "Visit Website",
-  "pages.versions.badge.hot": "Hot",
+  'pages.versions.eyebrow': 'SELF-HOSTED BY DESIGN',
+  'pages.versions.title': 'Choose the right delivery model',
+  'pages.versions.description':
+    'Both Open Source and Private SaaS run on your infrastructure. Open Source includes complete cluster and marketplace capabilities, while Private SaaS adds platform governance and commercial services for multi-team organizations.',
 
-  "pages.versions.card.community.title": "Community",
-  "pages.versions.card.community.feature.1": "Free",
-  "pages.versions.card.community.feature.2": "Up to 2 users",
-  "pages.versions.card.community.feature.3": "Up to 1 cluster",
-  "pages.versions.card.community.feature.4": "App store",
-  "pages.versions.card.community.feature.5": "AI integration for app and cluster operations",
-  "pages.versions.card.community.feature.6": "WeChat / QQ community support",
+  'pages.versions.card.opensource.title': 'Open Source',
+  'pages.versions.card.opensource.badge': 'Fully open source',
+  'pages.versions.card.opensource.description':
+    'For teams that want to self-host and retain full control of their data and infrastructure.',
+  'pages.versions.card.opensource.feature.1': 'Free to use and self-host',
+  'pages.versions.card.opensource.feature.2':
+    'No product limits on users or clusters',
+  'pages.versions.card.opensource.feature.3':
+    'Kubernetes multi-cluster and workload management',
+  'pages.versions.card.opensource.feature.4': 'Built-in Application Store',
+  'pages.versions.card.opensource.feature.5':
+    'Built-in Helm Store with repository sync and deployment',
+  'pages.versions.card.opensource.feature.6':
+    'AI-assisted application and cluster operations',
+  'pages.versions.card.opensource.feature.7': 'Community support',
+  'pages.versions.card.opensource.action': 'View open-source project',
 
-  "pages.versions.card.authed.title": "Verified",
-  "pages.versions.card.authed.feature.1": "Free",
-  "pages.versions.card.authed.feature.2": "Up to 5 users",
-  "pages.versions.card.authed.feature.3": "Up to 3 clusters",
-  "pages.versions.card.authed.feature.4": "App store",
-  "pages.versions.card.authed.feature.5": "AI integration for app and cluster operations",
-  "pages.versions.card.authed.feature.6": "WeChat / QQ community support",
-
-  "pages.versions.card.enterprise.title": "Enterprise",
-  "pages.versions.card.enterprise.feature.1": "All Community features",
-  "pages.versions.card.enterprise.feature.2": "Unlimited users",
-  "pages.versions.card.enterprise.feature.3": "Unlimited clusters",
-  "pages.versions.card.enterprise.feature.4": "App store",
-  "pages.versions.card.enterprise.feature.5": "AI integration for app and cluster operations",
-  "pages.versions.card.enterprise.feature.6": "5x8 dedicated support",
-
-  "pages.versions.card.saas.title": "SaaS",
-  "pages.versions.card.saas.feature.1": "All Enterprise features",
-  "pages.versions.card.saas.feature.2": "Multi-tenant management",
-  "pages.versions.card.saas.feature.3": "Unlimited users",
-  "pages.versions.card.saas.feature.4": "Unlimited clusters",
-  "pages.versions.card.saas.feature.5": "App store",
-  "pages.versions.card.saas.feature.6": "Supports large-scale clusters",
-  "pages.versions.card.saas.feature.7": "Lego-style visual pipeline design",
-  "pages.versions.card.saas.feature.8": "Distributed Cloud IDE + AI coding assistant",
-  "pages.versions.card.saas.feature.9": "7x24 dedicated support",
-  "pages.versions.card.saas.feature.10": "Customizable",
+  'pages.versions.card.saas.title': 'Private SaaS',
+  'pages.versions.card.saas.badge': 'Recommended · Commercial',
+  'pages.versions.card.saas.description':
+    'For organizations that need to serve and govern multiple teams from within their own environment.',
+  'pages.versions.card.saas.feature.1': 'Everything in Open Source',
+  'pages.versions.card.saas.feature.2':
+    'Runs on your infrastructure and keeps data in your domain',
+  'pages.versions.card.saas.feature.3':
+    'Tenant, organization and access isolation',
+  'pages.versions.card.saas.feature.4':
+    'Management capabilities for clusters at scale',
+  'pages.versions.card.saas.feature.5': 'Visual pipeline design',
+  'pages.versions.card.saas.feature.6':
+    'Distributed Cloud IDE with AI-assisted coding',
+  'pages.versions.card.saas.feature.7':
+    'Dedicated support, upgrade assistance and customization',
+  'pages.versions.card.saas.action': 'Explore Private SaaS',
 };

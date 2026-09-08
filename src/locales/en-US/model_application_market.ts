@@ -53,6 +53,7 @@ export default {
   'application.deleted': 'Deleted',
   'application.imported': 'Imported',
   'application.import': 'Import',
+  'application.export': 'Export YAML',
   'application.create': 'New application',
   'application.edit': 'Edit application',
   'application.delete.confirm': 'Delete this market application?',

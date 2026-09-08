@@ -19,6 +19,7 @@ export default {
   "menu.event-rule.inhibit": "抑制规则",
   "menu.oganizationWorkplace": "组织工作台",
   "menu.workload": "工作负载",
+  "menu.workload.applicationDeployments": "应用部署",
   "menu.workload.deployment": "无状态",
   "menu.workload.statefulset": "有状态",
   "menu.workload.daemonset": "守护进程集",

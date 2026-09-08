@@ -19,6 +19,7 @@ export default {
   "menu.event-rule.inhibit": "Inhibit Rules",
   "menu.oganizationWorkplace": "Organization Workplace",
   "menu.workload": "Workload",
+  "menu.workload.applicationDeployments": "Application Deployments",
   "menu.workload.deployment": "Deployment",
   "menu.workload.statefulset": "StatefulSet",
   "menu.workload.daemonset": "DaemonSet",

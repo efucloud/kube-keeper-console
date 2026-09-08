@@ -1,11 +1,12 @@
 import { request } from '@umijs/max';
 
+import { HelmStoreInstallRequest, HelmStoreInstallResult } from './helm_store.d';
 import { HelmValues } from './kubernetes.d';
 
 //卸载helm部署的应用
 //卸载helm部署的应用
 //请求方法: DELETE
-//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/helm{namespace}/release/{release}
+//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/helm/release/{release}
 //参数名: cluster 参数类型: string 参数位置: path 是否必须: true  参数说明: 集群编码
 //参数名: namespace 参数类型: string 参数位置: path 是否必须: true  参数说明: Namespace
 //参数名: release 参数类型: string 参数位置: path 是否必须: true  参数说明: 需要卸载的Release
@@ -17,7 +18,7 @@ export async function helmUninstallRelease(
   },
   options?: { [key: string]: any }) {
   const { cluster, namespace, release, ...rest } = params;
-  return request(`/api/v1/cluster/${cluster}/namespace/${namespace}/helm${namespace}/release/${release}`, {
+  return request(`/api/v1/cluster/${cluster}/namespace/${namespace}/helm/release/${release}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -29,7 +30,7 @@ export async function helmUninstallRelease(
 //获取Namespace中helm部署的应用
 //获取Namespace中helm部署的应用，根据secret来获取，会对同一个应用不同历史去重,返回release信息
 //请求方法: GET
-//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/helm{namespace}/release
+//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/helm/release
 //参数名: cluster 参数类型: string 参数位置: path 是否必须: true  参数说明: 集群编码
 //参数名: namespace 参数类型: string 参数位置: path 是否必须: true  参数说明: Namespace
 export async function helmRelease(
@@ -39,7 +40,7 @@ export async function helmRelease(
   },
   options?: { [key: string]: any }) {
   const { cluster, namespace, ...rest } = params;
-  return request(`/api/v1/cluster/${cluster}/namespace/${namespace}/helm${namespace}/release`, {
+  return request(`/api/v1/cluster/${cluster}/namespace/${namespace}/helm/release`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -51,23 +52,46 @@ export async function helmRelease(
 //获取Namespace中helm部署的应用部署历史
 //获取Namespace中helm部署的应用部署历史
 //请求方法: GET
-//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/helm{namespace}/release/history/{release}
+//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/helm/release/history/{release}
 //参数名: cluster 参数类型: string 参数位置: path 是否必须: true  参数说明: 集群编码
 //参数名: namespace 参数类型: string 参数位置: path 是否必须: true  参数说明: Namespace
 //参数名: release 参数类型: string 参数位置: path 是否必须: true  参数说明: Release名称
 export async function helmInstallHistory(
   params: {
+    cluster: string;// 集群编码
     namespace: string;// Namespace
     release: string;// Release名称
-    cluster: string;// 集群编码
   },
   options?: { [key: string]: any }) {
   const { cluster, namespace, release, ...rest } = params;
-  return request(`/api/v1/cluster/${cluster}/namespace/${namespace}/helm${namespace}/release/history/${release}`, {
+  return request(`/api/v1/cluster/${cluster}/namespace/${namespace}/helm/release/history/${release}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
+    params: { ...rest },
+    ...(options || {}),
+  });
+}
+//从Helm商店安装Chart
+//
+//请求方法: POST
+//请求地址: /api/v1/cluster/{cluster}/namespace/{namespace}/helm/store/install
+//参数名: cluster 参数类型: string 参数位置: path 是否必须: true  参数说明: 集群编码
+//参数名: namespace 参数类型: string 参数位置: path 是否必须: true  参数说明: Namespace
+export async function installHelmStoreChart<HelmStoreInstallResult>(
+  params: {
+    cluster: string;// 集群编码
+    namespace: string;// Namespace
+  },
+  data: HelmStoreInstallRequest,   options?: { [key: string]: any }) {
+  const { cluster, namespace, ...rest } = params;
+  return request<HelmStoreInstallResult>(`/api/v1/cluster/${cluster}/namespace/${namespace}/helm/store/install`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data,
     params: { ...rest },
     ...(options || {}),
   });

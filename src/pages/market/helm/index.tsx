@@ -1,6 +1,7 @@
 import {
   AppstoreOutlined,
   ExportOutlined,
+  RocketOutlined,
   TagsOutlined,
 } from '@ant-design/icons';
 import { PageContainer, ProDescriptions } from '@ant-design/pro-components';
@@ -32,6 +33,7 @@ import {
   listHelmStoreRepositories,
 } from '@/services/helm_store.api';
 import styles from './index.less';
+import DeployHelmChartModal from './deploy';
 import type {
   HelmChartDetail,
   HelmChartList,
@@ -53,6 +55,7 @@ const HelmStorePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<HelmChartDetail>();
   const [detailLoading, setDetailLoading] = useState(false);
+  const [deploying, setDeploying] = useState<HelmChartVersion>();
   const pageSize = 12;
 
   useEffect(() => {
@@ -223,17 +226,31 @@ const HelmStorePage: React.FC = () => {
                       ? dayjs(chart.created).format('YYYY.MM.DD')
                       : ''}
                   </Typography.Text>
-                  {chart.home && (
+                  <Space size={2}>
+                    {chart.home && (
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<ExportOutlined />}
+                        href={chart.home}
+                        target="_blank"
+                        onClick={(event) => event.stopPropagation()}
+                        style={{ color: token.colorPrimary }}
+                      />
+                    )}
                     <Button
                       type="text"
                       size="small"
-                      icon={<ExportOutlined />}
-                      href={chart.home}
-                      target="_blank"
-                      onClick={(event) => event.stopPropagation()}
+                      icon={<RocketOutlined />}
                       style={{ color: token.colorPrimary }}
-                    />
-                  )}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setDeploying(chart);
+                      }}
+                    >
+                      {intl.formatMessage({ id: 'helm.deploy' })}
+                    </Button>
+                  </Space>
                 </div>
               </Card>
             </List.Item>
@@ -303,11 +320,32 @@ const HelmStorePage: React.FC = () => {
                       '-'
                     ),
                 },
+                {
+                  title: intl.formatMessage({ id: 'helm.actions' }),
+                  width: 100,
+                  render: (_, item) => (
+                    <Button
+                      type="link"
+                      icon={<RocketOutlined />}
+                      onClick={() => {
+                        setDetail(undefined);
+                        setDeploying(item);
+                      }}
+                    >
+                      {intl.formatMessage({ id: 'helm.deploy' })}
+                    </Button>
+                  ),
+                },
               ]}
             />
           </Space>
         )}
       </Drawer>
+      <DeployHelmChartModal
+        chart={deploying}
+        open={Boolean(deploying)}
+        onClose={() => setDeploying(undefined)}
+      />
     </PageContainer>
   );
 };

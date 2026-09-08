@@ -122,5 +122,5 @@ export default {
   "pages.operation.paste.forbidden": "只读模式下禁止粘贴。",
   "pages.operation.clean.data": "清理数据",
   "pages.operation.clean.data.description": "清理24小时前无效数据",
-  "pages.versions.select": "版本升级",
+  "pages.versions.select": "版本与服务",
 };
