@@ -102,4 +102,7 @@ export default {
   'application.status': '状态',
   'application.result': '结果',
   'application.deployedAt': '部署时间',
+  'application.redeploy': '重新部署',
+  'application.redeploy.confirm': '确认使用原部署名称和参数重新部署？',
+  'application.redeploy.success': '应用已重新部署',
 };

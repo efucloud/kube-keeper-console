@@ -1,4 +1,4 @@
-import { DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined, RocketOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { PageContainer, ProTable } from '@ant-design/pro-components';
 import { useIntl } from '@umijs/max';
@@ -14,8 +14,10 @@ import {
   Typography,
 } from 'antd';
 import { useRef, useState } from 'react';
+import ReadOnlyYamlEditor from '@/pages/kubernetes/components/read_only_yaml_editor';
 import type { ApplicationDetail } from '@/services/application';
 import { deleteApplication, listApplication } from '@/services/application.api';
+import { deployMarketApplication } from '@/services/market_application.api';
 import { getCurrentViewInfo } from '@/utils/global';
 
 const statusColor: Record<string, string> = {
@@ -30,6 +32,33 @@ const ApplicationDeployments: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const { cluster, namespace } = getCurrentViewInfo();
   const [detail, setDetail] = useState<ApplicationDetail>();
+  const [redeploying, setRedeploying] = useState<string>();
+
+  const redeploy = async (record: ApplicationDetail) => {
+    setRedeploying(record.id);
+    try {
+      const deployed = await deployMarketApplication(
+        {
+          cluster,
+          namespace,
+          id: record.marketApplicationId,
+        },
+        {
+          releaseName: record.releaseName,
+          description: record.description,
+          params: record.params || {},
+        },
+      );
+      message.success(
+        intl.formatMessage({ id: 'application.redeploy.success' }),
+      );
+      if (detail?.id === record.id) setDetail(deployed);
+      actionRef.current?.reload();
+    } finally {
+      setRedeploying(undefined);
+    }
+  };
+
   const columns: ProColumns<ApplicationDetail>[] = [
     {
       title: intl.formatMessage({ id: 'application.releaseName' }),
@@ -85,7 +114,22 @@ const ApplicationDeployments: React.FC = () => {
             icon={<EyeOutlined />}
             onClick={() => setDetail(record)}
           />
-          {record.status !== 'Deleted' && (
+          {record.status === 'Deleted' ? (
+            <Popconfirm
+              title={intl.formatMessage({
+                id: 'application.redeploy.confirm',
+              })}
+              onConfirm={() => redeploy(record)}
+            >
+              <Button
+                type="text"
+                icon={<RocketOutlined />}
+                loading={redeploying === record.id}
+              >
+                {intl.formatMessage({ id: 'application.redeploy' })}
+              </Button>
+            </Popconfirm>
+          ) : (
             <Popconfirm
               title={intl.formatMessage({
                 id: 'application.deployment.delete.confirm',
@@ -131,6 +175,24 @@ const ApplicationDeployments: React.FC = () => {
         width={760}
         open={Boolean(detail)}
         onClose={() => setDetail(undefined)}
+        extra={
+          detail?.status === 'Deleted' ? (
+            <Popconfirm
+              title={intl.formatMessage({
+                id: 'application.redeploy.confirm',
+              })}
+              onConfirm={() => redeploy(detail)}
+            >
+              <Button
+                type="primary"
+                icon={<RocketOutlined />}
+                loading={redeploying === detail.id}
+              >
+                {intl.formatMessage({ id: 'application.redeploy' })}
+              </Button>
+            </Popconfirm>
+          ) : undefined
+        }
       >
         {detail && (
           <>
@@ -199,19 +261,15 @@ const ApplicationDeployments: React.FC = () => {
                     style={{ marginTop: 8 }}
                   />
                 )}
-                <pre
+                <div
                   style={{
-                    maxHeight: 320,
-                    overflow: 'auto',
-                    padding: 14,
+                    marginTop: 10,
+                    overflow: 'hidden',
                     borderRadius: 8,
-                    background: '#0f172a',
-                    color: '#dbeafe',
-                    fontSize: 12,
                   }}
                 >
-                  {resource.content}
-                </pre>
+                  <ReadOnlyYamlEditor content={resource.content || ''} />
+                </div>
               </div>
             ))}
           </>

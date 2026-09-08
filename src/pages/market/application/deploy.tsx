@@ -157,7 +157,7 @@ const DeployApplicationModal: React.FC<Props> = ({
       message.success(intl.formatMessage({ id: 'application.deploy.success' }));
       onClose();
       history.push(
-        `/kubernetes/namespace/workload/applications?cluster=${encodeURIComponent(target.cluster)}&namespace=${encodeURIComponent(target.namespace)}`,
+        `/kubernetes/namespace/applications?cluster=${encodeURIComponent(target.cluster)}&namespace=${encodeURIComponent(target.namespace)}`,
       );
     } finally {
       setSubmitting(false);

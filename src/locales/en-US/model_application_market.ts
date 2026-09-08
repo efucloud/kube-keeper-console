@@ -105,4 +105,8 @@ export default {
   'application.status': 'Status',
   'application.result': 'Result',
   'application.deployedAt': 'Deployed at',
+  'application.redeploy': 'Redeploy',
+  'application.redeploy.confirm':
+    'Redeploy with the original release name and parameters?',
+  'application.redeploy.success': 'Application redeployed',
 };
