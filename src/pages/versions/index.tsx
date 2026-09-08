@@ -57,6 +57,7 @@ const plans: Plan[] = [
       'pages.versions.card.saas.feature.5',
       'pages.versions.card.saas.feature.6',
       'pages.versions.card.saas.feature.7',
+      'pages.versions.card.saas.feature.8',
     ],
     actionKey: 'pages.versions.card.saas.action',
     actionIcon: <ExportOutlined />,

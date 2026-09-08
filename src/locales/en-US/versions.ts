@@ -31,10 +31,13 @@ export default {
     'Tenant, organization and access isolation',
   'pages.versions.card.saas.feature.4':
     'Management capabilities for clusters at scale',
-  'pages.versions.card.saas.feature.5': 'Visual pipeline design',
+  'pages.versions.card.saas.feature.5':
+    'Lego-style visual pipeline design',
   'pages.versions.card.saas.feature.6':
-    'Distributed Cloud IDE with AI-assisted coding',
+    'Lego-style application architecture design',
   'pages.versions.card.saas.feature.7':
+    'Distributed Cloud IDE with AI-assisted coding',
+  'pages.versions.card.saas.feature.8':
     'Dedicated support, upgrade assistance and customization',
   'pages.versions.card.saas.action': 'Explore Private SaaS',
 };

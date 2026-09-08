@@ -26,7 +26,8 @@ export default {
   'pages.versions.card.saas.feature.3': '多租户、组织与权限隔离',
   'pages.versions.card.saas.feature.4': '面向超大规模集群的管理能力',
   'pages.versions.card.saas.feature.5': '乐高式可视化流水线设计',
-  'pages.versions.card.saas.feature.6': '分布式云 IDE 与 AI 辅助编码',
-  'pages.versions.card.saas.feature.7': '专属技术支持、升级协作与定制服务',
+  'pages.versions.card.saas.feature.6': '乐高式应用架构设计',
+  'pages.versions.card.saas.feature.7': '分布式云 IDE 与 AI 辅助编码',
+  'pages.versions.card.saas.feature.8': '专属技术支持、升级协作与定制服务',
   'pages.versions.card.saas.action': '了解私有化 SaaS',
 };
