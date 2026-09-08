@@ -24,34 +24,10 @@ export type HelmChartVersion = {
 };
 
 export type HelmChartList = { data: HelmChartVersion[]; total: number };
+
 export type HelmChartDetail = {
   repositoryId: string;
   repository: string;
   name: string;
   versions: HelmChartVersion[];
-};
-
-export type HelmRepositoryDetail = {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  url: string;
-  username?: string;
-  insecureSkipTLSVerify: boolean;
-  enabled: boolean;
-  lastSyncedAt?: string;
-  lastSyncError?: string;
-  cached: boolean;
-};
-
-export type HelmRepositoryList = { data: HelmRepositoryDetail[]; total: number };
-export type HelmRepositoryInput = {
-  id?: string;
-  name: string;
-  url: string;
-  username?: string;
-  password?: string;
-  insecureSkipTLSVerify?: boolean;
-  enabled: boolean;
 };

@@ -7,13 +7,6 @@ export default [
     access: "adminAccess",
   },
   {
-    name: "helmRepository",
-    icon: "cloudServer",
-    path: "/admin/helm-repository",
-    component: "./admin/helm_repository",
-    access: "adminAccess",
-  },
-  {
     name: "appManagement",
     path: "/admin/application/:id/edit",
     hideInMenu: true,
@@ -77,6 +70,13 @@ export default [
     icon: "unorderedList",
     path: "/admin/settings/dict",
     component: "./admin/settings/dict",
+    access: "adminAccess",
+  },
+  {
+    name: "helmRepository",
+    icon: "cloudServer",
+    path: "/admin/helm-repository",
+    component: "./admin/helm_repository",
     access: "adminAccess",
   },
 ];

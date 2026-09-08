@@ -17,16 +17,24 @@ import { Button, message, Popconfirm, Space, Tag, Tooltip } from 'antd';
 import dayjs from 'dayjs';
 import { useRef, useState } from 'react';
 import type {
+  HelmRepositoryCreate,
   HelmRepositoryDetail,
-  HelmRepositoryInput,
-} from '@/services/helm_store';
+  HelmRepositoryDetailList,
+  HelmRepositoryUpdate,
+} from '@/services/helm_repository';
 import {
   createHelmRepository,
   deleteHelmRepository,
-  listHelmRepositories,
+  listHelmRepository,
   syncHelmRepository,
   updateHelmRepository,
 } from '@/services/helm_store.api';
+
+type HelmRepositoryForm = HelmRepositoryCreate & {
+  name: string;
+  url: string;
+  enabled: boolean;
+};
 
 const HelmRepositoryManagement: React.FC = () => {
   const intl = useIntl();
@@ -94,7 +102,9 @@ const HelmRepositoryManagement: React.FC = () => {
               type="text"
               icon={<SyncOutlined />}
               onClick={async () => {
-                await syncHelmRepository(record.id);
+                await syncHelmRepository<HelmRepositoryDetail>({
+                  id: record.id,
+                });
                 message.success(intl.formatMessage({ id: 'helm.syncSuccess' }));
                 actionRef.current?.reload();
               }}
@@ -111,7 +121,7 @@ const HelmRepositoryManagement: React.FC = () => {
           <Popconfirm
             title={intl.formatMessage({ id: 'helm.repository.deleteConfirm' })}
             onConfirm={async () => {
-              await deleteHelmRepository([record.id]);
+              await deleteHelmRepository({ ids: [record.id] });
               message.success(intl.formatMessage({ id: 'helm.saved' }));
               actionRef.current?.reload();
             }}
@@ -131,8 +141,13 @@ const HelmRepositoryManagement: React.FC = () => {
         columns={columns}
         search={false}
         request={async (params) => {
-          const result = await listHelmRepositories(params);
-          return { data: result.data, total: result.total, success: true };
+          const result =
+            await listHelmRepository<HelmRepositoryDetailList>(params);
+          return {
+            data: result.data || [],
+            total: result.total || 0,
+            success: true,
+          };
         }}
         toolBarRender={() => [
           <Button
@@ -148,7 +163,7 @@ const HelmRepositoryManagement: React.FC = () => {
           </Button>,
         ]}
       />
-      <ModalForm<HelmRepositoryInput>
+      <ModalForm<HelmRepositoryForm>
         key={editing?.id || 'new'}
         open={open}
         onOpenChange={setOpen}
@@ -160,9 +175,14 @@ const HelmRepositoryManagement: React.FC = () => {
         }
         modalProps={{ destroyOnHidden: true }}
         onFinish={async (values) => {
-          if (editing)
-            await updateHelmRepository({ ...values, id: editing.id });
-          else await createHelmRepository(values);
+          if (editing) {
+            await updateHelmRepository<HelmRepositoryDetail>({
+              ...values,
+              id: editing.id,
+            } as HelmRepositoryUpdate);
+          } else {
+            await createHelmRepository<HelmRepositoryDetail>(values);
+          }
           message.success(intl.formatMessage({ id: 'helm.saved' }));
           setOpen(false);
           actionRef.current?.reload();

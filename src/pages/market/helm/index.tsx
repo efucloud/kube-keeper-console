@@ -26,17 +26,18 @@ import {
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { StandardFormRow, TagSelect } from '@/components';
-import type {
-  HelmChartDetail,
-  HelmChartVersion,
-  HelmStoreRepository,
-} from '@/services/helm_store';
 import {
   getHelmStoreChart,
   listHelmStoreCharts,
   listHelmStoreRepositories,
 } from '@/services/helm_store.api';
 import styles from './index.less';
+import type {
+  HelmChartDetail,
+  HelmChartList,
+  HelmChartVersion,
+  HelmStoreRepository,
+} from './types';
 
 const allRepositories = '__all__';
 
@@ -60,7 +61,7 @@ const HelmStorePage: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    listHelmStoreCharts({
+    listHelmStoreCharts<HelmChartList>({
       repository,
       search: search || undefined,
       current,
@@ -76,7 +77,12 @@ const HelmStorePage: React.FC = () => {
   const openDetail = async (chart: HelmChartVersion) => {
     setDetailLoading(true);
     try {
-      setDetail(await getHelmStoreChart(chart.repositoryId, chart.name));
+      setDetail(
+        await getHelmStoreChart<HelmChartDetail>({
+          repository: chart.repositoryId,
+          chart: chart.name,
+        }),
+      );
     } finally {
       setDetailLoading(false);
     }
