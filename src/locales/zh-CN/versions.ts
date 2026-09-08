@@ -1,5 +1,4 @@
 export default {
-  'pages.versions.eyebrow': 'SELF-HOSTED BY DESIGN',
   'pages.versions.title': '选择适合团队的交付形态',
   'pages.versions.description':
     '开源版与私有化 SaaS 均部署在你的基础设施中。开源版提供完整的集群与商店能力，私有化 SaaS 面向多团队场景提供更完善的平台治理与商业服务。',

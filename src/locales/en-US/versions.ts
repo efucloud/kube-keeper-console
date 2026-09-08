@@ -1,5 +1,4 @@
 export default {
-  'pages.versions.eyebrow': 'SELF-HOSTED BY DESIGN',
   'pages.versions.title': 'Choose the right delivery model',
   'pages.versions.description':
     'Both Open Source and Private SaaS run on your infrastructure. Open Source includes complete cluster and marketplace capabilities, while Private SaaS adds platform governance and commercial services for multi-team organizations.',

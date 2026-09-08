@@ -72,9 +72,6 @@ const VersionIndex: FC = () => {
   return (
     <PageContainer title={false} className={styles.page}>
       <section className={styles.hero}>
-        <Tag bordered={false} color="processing" className={styles.eyebrow}>
-          {intl.formatMessage({ id: 'pages.versions.eyebrow' })}
-        </Tag>
         <Typography.Title level={1} className={styles.title}>
           {intl.formatMessage({ id: 'pages.versions.title' })}
         </Typography.Title>

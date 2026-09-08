@@ -15,12 +15,14 @@ export default [
   },
   {
     name: "account",
+    icon: "user",
     path: "/admin/account",
     component: "./admin/account",
     access: "adminAccess",
   },
   {
     name: "cluster",
+    icon: "cluster",
     path: "/admin/cluster",
     component: "./admin/cluster",
     access: "adminAccess",
