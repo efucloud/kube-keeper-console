@@ -88,6 +88,15 @@ export async function getInitialState(): Promise<{
         url: '/market/application',
         target: '_blank',
       } as AppItemProps);
+      app.push({
+        title: getI18nLanguage() === 'en-US' ? 'Helm Store' : 'Helm 商店',
+        desc: getI18nLanguage() === 'en-US'
+          ? 'Discover charts from synchronized Helm repositories'
+          : '从已同步的 Helm 仓库发现 Chart',
+        icon: <AppstoreOutlined style={{ fontSize: '30px' }} />,
+        url: '/market/helm',
+        target: '_blank',
+      } as AppItemProps);
     }
     return app as AppListProps;
   };

@@ -4,6 +4,8 @@ export default {
   "menu.welcome": "欢迎",
   "menu.workplace": "工作台",
   "menu.applicationMarket": "应用市场",
+  "menu.helmStore": "Helm 商店",
+  "menu.helmRepository": "Helm 仓库",
   "menu.appManagement": "应用管理",
   "menu.applicationDeployments": "应用部署",
   "menu.workspace": "工作空间",

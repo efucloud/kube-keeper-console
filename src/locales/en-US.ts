@@ -10,6 +10,7 @@ import model from "./en-US/model";
 import model_account from "./en-US/model_account";
 import model_appstore from "./en-US/model_appstore";
 import model_application_market from "./en-US/model_application_market";
+import model_helm_store from "./en-US/model_helm_store";
 import model_cluster from "./en-US/model_cluster";
 import model_cluster_role_template from "./en-US/model_cluster_role_template";
 import dict from "./en-US/model_dict";
@@ -40,6 +41,7 @@ export default {
   ...metrics,
   ...model_appstore,
   ...model_application_market,
+  ...model_helm_store,
   ...versions,
   ...copilot,
   ...ide,

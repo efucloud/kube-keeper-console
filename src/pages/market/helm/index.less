@@ -1,0 +1,29 @@
+.marketPage {
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(24, 144, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(24, 144, 255, 0.035) 1px, transparent 1px);
+  background-size: 28px 28px;
+
+  :global(.ant-pro-page-container-children-container) { padding-top: 20px; }
+}
+
+.searchArea { width: 100%; max-width: 622px; margin: 0 auto; text-align: center; }
+.filterCard { margin-bottom: 16px; }
+.chartCard {
+  height: 242px;
+  overflow: hidden;
+  border-top: 3px solid #13c2c2;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+
+  &:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(0, 45, 78, 0.12); }
+  :global(.ant-card-body) { display: flex; flex-direction: column; height: 100%; padding: 14px; }
+}
+.fallbackIcon { color: #fff; background: linear-gradient(145deg, #0050b3, #13c2c2); }
+.meta { margin-top: 14px; :global(.ant-descriptions-item-label), :global(.ant-descriptions-item-content) { padding-bottom: 0; font-size: 12px; } }
+.description { min-height: 44px; margin: 10px 0 6px !important; font-size: 13px; }
+.tags { min-height: 24px; :global(.ant-tag) { margin-inline-end: 0; } }
+.divider { margin: auto 0 6px !important; }
+.footer { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+.pagination { margin-top: 12px; text-align: right; }

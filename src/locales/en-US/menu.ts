@@ -4,6 +4,8 @@ export default {
   "menu.welcome": "Welcome",
   "menu.workplace": "Workplace",
   "menu.applicationMarket": "Application Market",
+  "menu.helmStore": "Helm Store",
+  "menu.helmRepository": "Helm Repositories",
   "menu.appManagement": "Application Management",
   "menu.applicationDeployments": "Application Deployments",
   "menu.workspace": "Workspace",

@@ -40,6 +40,13 @@ export default [
     component: "./market/application/detail",
   },
   {
+    name: "helmStore",
+    path: "/market/helm",
+    hideInMenu: true,
+    menuRender: false,
+    component: "./market/helm",
+  },
+  {
     path: "/versions",
     hideInMenu: true,
     menuRender: false,

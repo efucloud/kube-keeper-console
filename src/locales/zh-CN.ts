@@ -10,6 +10,7 @@ import model from "./zh-CN/model";
 import model_account from "./zh-CN/model_account";
 import model_appstore from "./zh-CN/model_appstore";
 import model_application_market from "./zh-CN/model_application_market";
+import model_helm_store from "./zh-CN/model_helm_store";
 import model_cluster from "./zh-CN/model_cluster";
 import model_cluster_role_template from "./zh-CN/model_cluster_role_template";
 import dict from "./zh-CN/model_dict";
@@ -40,6 +41,7 @@ export default {
   ...metrics,
   ...model_appstore,
   ...model_application_market,
+  ...model_helm_store,
   ...versions,
   ...copilot,
   ...ide,
