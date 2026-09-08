@@ -510,11 +510,6 @@
         path: "/kubernetes/namespace/monitor/events",
         component: "./kubernetes/namespace/monitor/event",
       },
-      {
-        name: "terminalAuditLog",
-        path: "/kubernetes/namespace/monitor/terminal",
-        component: "./kubernetes/cluster/monitor/terminal",
-      },
     ],
   },
   {
@@ -817,11 +812,6 @@
         hideInMenu: true,
         path: "/kubernetes/namespace/monitor/events/:name/:action",
         component: "./kubernetes/namespace/monitor/event/text",
-      },
-      {
-        name: "terminalAuditLog",
-        path: "/kubernetes/namespace/monitor/terminal",
-        component: "./kubernetes/cluster/monitor/terminal",
       },
     ],
   },

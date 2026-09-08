@@ -461,7 +461,6 @@ export default {
   "cluster.prometheus.password": "Password",
   "cluster.prometheus.token": "Access Token",
   "cluster.auditlog": "Cluster Audit Log",
-  "cluster.pod.terminal.auditlog": "Terminal Audit",
   "cluster.pod.terminal.tootip":
     "If the container does not support Chinese, Chinese will be displayed as garbled characters",
   "cluster.extend.auditLog": "Audit Log",

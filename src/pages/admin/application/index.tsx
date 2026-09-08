@@ -39,6 +39,8 @@ const ApplicationManagement: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [categories, setCategories] = useState<DictionaryLine[]>([]);
   const [tags, setTags] = useState<DictionaryLine[]>([]);
+  const confirmText = intl.formatMessage({ id: 'pages.operation.confirm' });
+  const cancelText = intl.formatMessage({ id: 'pages.operation.cancel' });
   useEffect(() => {
     Promise.all([
       getDataDictionary({ code: MARKET_APPLICATION_CATEGORY_DICTIONARY }),
@@ -142,6 +144,8 @@ const ApplicationManagement: React.FC = () => {
             }
           />
           <Popconfirm
+            okText={confirmText}
+            cancelText={cancelText}
             title={intl.formatMessage({ id: 'application.delete.confirm' })}
             onConfirm={async () => {
               await deleteMarketApplication({ ids: [record.id] });

@@ -41,6 +41,8 @@ const HelmRepositoryManagement: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<HelmRepositoryDetail>();
+  const confirmText = intl.formatMessage({ id: 'pages.operation.confirm' });
+  const cancelText = intl.formatMessage({ id: 'pages.operation.cancel' });
 
   const columns: ProColumns<HelmRepositoryDetail>[] = [
     {
@@ -119,6 +121,8 @@ const HelmRepositoryManagement: React.FC = () => {
             }}
           />
           <Popconfirm
+            okText={confirmText}
+            cancelText={cancelText}
             title={intl.formatMessage({ id: 'helm.repository.deleteConfirm' })}
             onConfirm={async () => {
               await deleteHelmRepository({ ids: [record.id] });
@@ -174,6 +178,12 @@ const HelmRepositoryManagement: React.FC = () => {
           editing || { enabled: true, insecureSkipTLSVerify: false }
         }
         modalProps={{ destroyOnHidden: true }}
+        submitter={{
+          searchConfig: {
+            submitText: intl.formatMessage({ id: 'pages.operation.save' }),
+            resetText: cancelText,
+          },
+        }}
         onFinish={async (values) => {
           if (editing) {
             await updateHelmRepository<HelmRepositoryDetail>({

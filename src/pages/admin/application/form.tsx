@@ -110,6 +110,14 @@ const ApplicationForm: React.FC = () => {
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [templateContent, setTemplateContent] = useState('');
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const confirmText = intl.formatMessage({ id: 'pages.operation.confirm' });
+  const cancelText = intl.formatMessage({ id: 'pages.operation.cancel' });
+  const modalSubmitter = {
+    searchConfig: {
+      submitText: confirmText,
+      resetText: cancelText,
+    },
+  };
 
   useEffect(() => {
     Promise.all([
@@ -290,6 +298,8 @@ const ApplicationForm: React.FC = () => {
             />
           </Tooltip>
           <Popconfirm
+            okText={confirmText}
+            cancelText={cancelText}
             title={intl.formatMessage({
               id: 'application.parameter.delete.confirm',
             })}
@@ -342,6 +352,8 @@ const ApplicationForm: React.FC = () => {
       width: 80,
       render: (_, record) => (
         <Popconfirm
+          okText={confirmText}
+          cancelText={cancelText}
           title={intl.formatMessage({
             id: 'application.template.delete.confirm',
           })}
@@ -609,6 +621,7 @@ const ApplicationForm: React.FC = () => {
         clearOnDestroy
         initialValues={selectedParameter}
         modalProps={{ destroyOnHidden: true }}
+        submitter={modalSubmitter}
         onFinish={async (values) => {
           const record: ParameterFormValue = {
             ...values,
@@ -686,6 +699,7 @@ const ApplicationForm: React.FC = () => {
         onOpenChange={setTemplateModalOpen}
         clearOnDestroy
         modalProps={{ destroyOnHidden: true }}
+        submitter={modalSubmitter}
         onFinish={async () => {
           const resources = splitYamlFiles(templateContent).map(createTemplate);
           if (resources.length === 0) {
@@ -722,6 +736,7 @@ const ApplicationForm: React.FC = () => {
         onOpenChange={setImportModalOpen}
         clearOnDestroy
         modalProps={{ destroyOnHidden: true }}
+        submitter={modalSubmitter}
         onFinish={async (values) => {
           const files = (values.templates || [])
             .map((file) => file.originFileObj)

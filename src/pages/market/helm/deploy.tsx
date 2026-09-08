@@ -191,6 +191,7 @@ const DeployHelmChartModal: React.FC<Props> = ({ chart, open, onClose }) => {
       onOk={deploy}
       confirmLoading={submitting}
       okText={intl.formatMessage({ id: 'helm.deploy' })}
+      cancelText={intl.formatMessage({ id: 'pages.operation.cancel' })}
       okButtonProps={{
         disabled: valuesLoading || !valuesLoaded,
         icon: <RocketOutlined />,

@@ -27,12 +27,29 @@ const statusColor: Record<string, string> = {
   Deleted: 'default',
 };
 
+const statusMessageId: Record<string, string> = {
+  Running: 'application.status.running',
+  Failed: 'application.status.failed',
+  Deploying: 'application.status.deploying',
+  Deleted: 'application.status.deleted',
+};
+
+const resultMessageId: Record<string, string> = {
+  pending: 'application.result.pending',
+  success: 'application.result.success',
+  partial: 'application.result.partial',
+  failed: 'application.result.failed',
+  deleted: 'application.status.deleted',
+};
+
 const ApplicationDeployments: React.FC = () => {
   const intl = useIntl();
   const actionRef = useRef<ActionType>(null);
   const { cluster, namespace } = getCurrentViewInfo();
   const [detail, setDetail] = useState<ApplicationDetail>();
   const [redeploying, setRedeploying] = useState<string>();
+  const confirmText = intl.formatMessage({ id: 'pages.operation.confirm' });
+  const cancelText = intl.formatMessage({ id: 'pages.operation.cancel' });
 
   const redeploy = async (record: ApplicationDetail) => {
     setRedeploying(record.id);
@@ -77,20 +94,32 @@ const ApplicationDeployments: React.FC = () => {
       dataIndex: 'status',
       valueType: 'select',
       valueEnum: {
-        Running: { text: 'Running' },
-        Failed: { text: 'Failed' },
-        Deploying: { text: 'Deploying' },
-        Deleted: { text: 'Deleted' },
+        Running: {
+          text: intl.formatMessage({ id: statusMessageId.Running }),
+        },
+        Failed: {
+          text: intl.formatMessage({ id: statusMessageId.Failed }),
+        },
+        Deploying: {
+          text: intl.formatMessage({ id: statusMessageId.Deploying }),
+        },
+        Deleted: {
+          text: intl.formatMessage({ id: statusMessageId.Deleted }),
+        },
       },
       render: (_, record) => (
-        <Tag color={statusColor[record.status]}>{record.status}</Tag>
+        <Tag color={statusColor[record.status]}>
+          {intl.formatMessage({ id: statusMessageId[record.status] })}
+        </Tag>
       ),
     },
     {
       title: intl.formatMessage({ id: 'application.result' }),
       dataIndex: 'result',
       search: false,
-      render: (_, record) => <Tag>{record.result}</Tag>,
+      render: (_, record) => (
+        <Tag>{intl.formatMessage({ id: resultMessageId[record.result] })}</Tag>
+      ),
     },
     {
       title: intl.formatMessage({ id: 'application.resources' }),
@@ -116,6 +145,8 @@ const ApplicationDeployments: React.FC = () => {
           />
           {record.status === 'Deleted' ? (
             <Popconfirm
+              okText={confirmText}
+              cancelText={cancelText}
               title={intl.formatMessage({
                 id: 'application.redeploy.confirm',
               })}
@@ -131,6 +162,8 @@ const ApplicationDeployments: React.FC = () => {
             </Popconfirm>
           ) : (
             <Popconfirm
+              okText={confirmText}
+              cancelText={cancelText}
               title={intl.formatMessage({
                 id: 'application.deployment.delete.confirm',
               })}
@@ -178,6 +211,8 @@ const ApplicationDeployments: React.FC = () => {
         extra={
           detail?.status === 'Deleted' ? (
             <Popconfirm
+              okText={confirmText}
+              cancelText={cancelText}
               title={intl.formatMessage({
                 id: 'application.redeploy.confirm',
               })}
@@ -209,7 +244,9 @@ const ApplicationDeployments: React.FC = () => {
                   label: intl.formatMessage({ id: 'application.status' }),
                   children: (
                     <Tag color={statusColor[detail.status]}>
-                      {detail.status}
+                      {intl.formatMessage({
+                        id: statusMessageId[detail.status],
+                      })}
                     </Tag>
                   ),
                 },
@@ -251,7 +288,13 @@ const ApplicationDeployments: React.FC = () => {
                           : 'red'
                     }
                   >
-                    {resource.deployStatus}
+                    {resource.deployStatus
+                      ? intl.formatMessage({
+                          id:
+                            resultMessageId[resource.deployStatus] ||
+                            'application.result.pending',
+                        })
+                      : '-'}
                   </Tag>
                 </Space>
                 {resource.message && (

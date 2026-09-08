@@ -588,11 +588,6 @@ export default [
         path: "/kubernetes/cluster/monitor/audit",
         component: "./kubernetes/cluster/monitor/audit",
       },
-      {
-        name: "terminalAuditLog",
-        path: "/kubernetes/cluster/monitor/terminal",
-        component: "./kubernetes/cluster/monitor/terminal",
-      },
     ],
   },
 

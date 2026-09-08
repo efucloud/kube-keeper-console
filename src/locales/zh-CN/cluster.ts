@@ -462,7 +462,6 @@ export default {
   "cluster.prometheus.password": "用户密码",
   "cluster.prometheus.token": "访问令牌",
   "cluster.auditlog": "集群审计日志",
-  "cluster.pod.terminal.auditlog": "终端审计",
   "cluster.pod.terminal.tootip": "若容器不支持中文，中文显示为乱码",
   "cluster.extend.auditLog": "审计日志",
   "cluster.extend.auditLog.description":
